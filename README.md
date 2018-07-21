@@ -16,6 +16,9 @@ The rootkit can do the following:
 - Protect against being unloaded by the user
 - Disable the unload protection
 
+## Tested On:
+Lihuen 5.10 GNU/Linux 3.2.0-4-amd64 #1 SMP Debian 3.2.57-3+deb7u2 x86_64 GNU/Linux
+
 ## Supported Platforms
 
 The rootkit was tested to work on Linux kernels 2.6.32-38 and 4.4.0-22 as provided by Ubuntu in Ubuntu 10.04.4 LTS and Ubuntu 16.04 LTS respectively, but it should be very easy to port to kernels in-between, as well as newer ones.
