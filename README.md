@@ -20,6 +20,7 @@ The rootkit can do the following:
 
 |           Distro            |       Kernel        |    Arch    |
 |-----------------------------|---------------------|------------|
+| Kali Linux (Rolling)        |  4.14.0-kali3-amd64 |   x86_64   |
 | Ubuntu 16.04.4 LTS          |  4.13.0-36-generic  |   x86_64   |
 | Fedora 26                   |  4.11.8-300.fc26    |   x86_64   |
 | Wifislax                    |  3.12.36            |   i686     |
