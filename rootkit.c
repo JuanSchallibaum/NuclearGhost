@@ -154,7 +154,8 @@ struct proc_dir_entry {
 #define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
 
 MODULE_LICENSE("GPL");
-MODULE_AUTHOR("Maxim Biro <nurupo.contributions@gmail.com>");
+MODULE_AUTHOR("Juan Schällibaum <juanschallibaum@gmail.com>");
+//MODULE_AUTHOR("Maxim Biro <nurupo.contributions@gmail.com>");
 
 
 #define ARCH_ERROR_MESSAGE "Only i386 and x86_64 architectures are supported! " \
