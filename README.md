@@ -18,11 +18,12 @@ The rootkit can do the following:
 
 ## Tested On:
 
-|    Distro                   |     Kernel         |   Arch      |
-|-----------------------------|--------------------|-------------|
-| Fedora 26                   |  4.11.8-300.fc26   |    x86_64   |
-| Lihuen 5.10 (Debian based)  |  3.2.0-4-amd64     |    x86_64   |
-| Wifislax                    |  3.12.36           |    i686     |
+|           Distro            |       Kernel        |    Arch    |
+|-----------------------------|---------------------|------------|
+| Ubuntu 16.04.4 LTS          |  4.13.0-36-generic  |   x86_64   |
+| Fedora 26                   |  4.11.8-300.fc26    |   x86_64   |
+| Wifislax                    |  3.12.36            |   i686     |
+| Lihuen 5.10 (Debian based)  |  3.2.0-4-amd64      |   x86_64   |
 
 In Wifislax x86 with 3.12.36, doesn't work file hidding functionality, but pid hidding works well.
 
