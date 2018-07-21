@@ -16,7 +16,7 @@ The rootkit can do the following:
 - Protect against being unloaded by the user
 - Disable the unload protection
 
-## Tested On:
+## Tested On
 
 |           Distro            |       Kernel        |    Arch    |
 |-----------------------------|---------------------|------------|
