@@ -17,7 +17,8 @@ The rootkit can do the following:
 - Disable the unload protection
 
 ## Tested On:
-Lihuen 5.10 GNU/Linux 3.2.0-4-amd64 #1 SMP Debian 3.2.57-3+deb7u2 x86_64 GNU/Linux
+Distro:Fedora 26                   Kernel: 4.11.8-300.fc26      Arch:x86_64 
+Distro:Lihuen 5.10 (Debian based)  Kernel: 3.2.0-4-amd64        Arch:x86_64
 
 ## Supported Platforms
 
