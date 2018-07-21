@@ -777,7 +777,7 @@ int setup_proc_comm_channel(void)
     LINUX_VERSION_CODE < KERNEL_VERSION(4, 4, 0)
 */
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 32) && \
-    LINUX_VERSION_CODE < KERNEL_VERSION(3, 3, 0)
+    LINUX_VERSION_CODE < KERNEL_VERSION(4, 0, 0)
 
     proc_entry = proc_entry->subdir;
 
@@ -797,7 +797,7 @@ int setup_proc_comm_channel(void)
 #elif LINUX_VERSION_CODE >= KERNEL_VERSION(4, 4, 0) && \
     LINUX_VERSION_CODE < KERNEL_VERSION(4, 13, 0)
 */
-#elif LINUX_VERSION_CODE >= KERNEL_VERSION(3, 3, 0) && \
+#elif LINUX_VERSION_CODE >= KERNEL_VERSION(4, 0, 0) && \
     LINUX_VERSION_CODE < KERNEL_VERSION(4, 13, 0)	
 
     struct rb_node *entry = rb_first(&proc_entry->subdir);
