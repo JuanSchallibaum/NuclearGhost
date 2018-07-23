@@ -46,8 +46,11 @@
 
 #define TMPSZ 150
 
+/*
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(3, 10, 0) && \
     LINUX_VERSION_CODE < KERNEL_VERSION(4, 4, 0)
+*/
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3, 10, 0)
 
 struct proc_dir_entry {
 	unsigned int low_ino;
@@ -58,7 +61,18 @@ struct proc_dir_entry {
 	loff_t size;
 	const struct inode_operations *proc_iops;
 	const struct file_operations *proc_fops;
+	#if LINUX_VERSION_CODE >= KERNEL_VERSION(3, 10, 0)
 	struct proc_dir_entry *next, *parent, *subdir;
+	#elif LINUX_VERSION_CODE >= KERNEL_VERSION(4, 4, 0) && \
+    	LINUX_VERSION_CODE < KERNEL_VERSION(4, 13, 0)
+	struct rb_root subdir;
+	struct proc_dir_entry *parent;
+    	struct rb_node subdir_node;
+	#elif LINUX_VERSION_CODE >= KERNEL_VERSION(4, 14, 0)
+	struct rb_root_cached subdir;
+	struct proc_dir_entry *parent;
+    	struct rb_node subdir_node;
+	#endif
 	void *data;
 	atomic_t count;		/* use count */
 	atomic_t in_use;	/* number of callers into module in progress; */
@@ -70,28 +84,7 @@ struct proc_dir_entry {
 	char name[];
 };
 
-#elif LINUX_VERSION_CODE == KERNEL_VERSION(4, 4, 0)
-
-struct proc_dir_entry {
-	unsigned int low_ino;
-	umode_t mode;
-	nlink_t nlink;
-	kuid_t uid;
-	kgid_t gid;
-	loff_t size;
-	const struct inode_operations *proc_iops;
-	const struct file_operations *proc_fops;
-	struct proc_dir_entry *next, *parent, *subdir;
-	void *data;
-	atomic_t count;		/* use count */
-	atomic_t in_use;	/* number of callers into module in progress; */
-			/* negative -> it's going away RSN */
-	struct completion *pde_unload_completion;
-	struct list_head pde_openers;	/* who did ->open, but not ->release */
-	spinlock_t pde_unload_lock; /* proc_fops checks and pde_users bumps */
-	u8 namelen;
-	char name[];
-};
+#endif
 
 /*
 #elif LINUX_VERSION_CODE >= KERNEL_VERSION(4, 4, 0) && \
