@@ -1,4 +1,4 @@
-![alt text](https://github.com/JuanSchallibaum/Nuk3Gh0st/blob/master/logo.jpg)
+![alt text](https://github.com/JuanSchallibaum/Nuk3Gh0st/blob/master/logo.jpg | width=100)
 
 # Nuk3 Gh0st
 
