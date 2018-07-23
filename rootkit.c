@@ -414,7 +414,8 @@ struct hidden_port {
 
 LIST_HEAD(hidden_tcp4_ports);
 
-void hide_tcp4_port ( unsigned short port )
+//void hide_tcp4_port ( unsigned short port )
+void hide_tcp4_port(const char *port)
 {
     struct hidden_port *hp;
 
@@ -429,7 +430,8 @@ void hide_tcp4_port ( unsigned short port )
     return 1;
 }
 
-void unhide_tcp4_port ( unsigned short port )
+//void unhide_tcp4_port ( unsigned short port )
+void unhide_tcp4_port(const char *port)
 {
     struct hidden_port *hp;
 
