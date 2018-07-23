@@ -172,7 +172,7 @@ struct proc_dir_entry {
 
 #include "config.h"
 
-#define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
+//#define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Juan Schällibaum <juanschallibaum@gmail.com>");
