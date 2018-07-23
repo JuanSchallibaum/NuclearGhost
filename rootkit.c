@@ -38,6 +38,12 @@
 #include <linux/delay.h>
 #include <linux/version.h>
 
+#include <linux/net.h>
+#include <linux/in.h>
+#include <net/tcp.h>
+#include <net/udp.h>
+#include <linux/init.h>
+
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(3, 10, 0) && \
     LINUX_VERSION_CODE < KERNEL_VERSION(4, 4, 0)
 
