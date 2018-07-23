@@ -640,7 +640,7 @@ void *get_tcp_seq_show ( const char *path )
     }
 
 
-#if LINUX_VERSION_CODE <= KERNEL_VERSION(3, 2, 0)
+#if LINUX_VERSION_CODE <= KERNEL_VERSION(3, 3, 0)
 
     #define READDIR(NAME) \
         int NAME##_readdir(struct file *file, void *dirent, filldir_t filldir) \
@@ -655,7 +655,7 @@ void *get_tcp_seq_show ( const char *path )
             return ret; \
         }
 
-#elif LINUX_VERSION_CODE > KERNEL_VERSION(3, 2, 0)
+#elif LINUX_VERSION_CODE > KERNEL_VERSION(3, 3, 0)
 
     #define READDIR(NAME) \
         int NAME##_iterate(struct file *file, struct dir_context *context) \
