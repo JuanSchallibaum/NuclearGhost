@@ -113,7 +113,7 @@ struct proc_dir_entry {
 	umode_t mode;
 	u8 namelen;
 	char name[];
-}
+};
 
 #endif
 
