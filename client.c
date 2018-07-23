@@ -61,7 +61,7 @@ void handle_command_line_arguments(int argc, char **argv, int *root, int *hide_p
                                    int *unhide_pid, char **pid, int *hide_file,
                                    int *unhide_file, char **file, int *hide_tcp_port,
                                    int *unhide_tcp_port, int *hide_udp_port,
-                                   int unhide_udp_port, char **port,  int *hide,
+                                   int *unhide_udp_port, char **port,  int *hide,
                                    int *unhide, int *protect, int *unprotect)
 {
     if (argc < 2) {
