@@ -1237,7 +1237,7 @@ int init(void)
     return 0;
 }
 
-void exit(void)
+int exit(void)
 {
     asm_hook_remove_all();
     pid_remove_all();
