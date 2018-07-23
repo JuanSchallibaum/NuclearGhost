@@ -26,6 +26,7 @@ The rootkit can do the following:
 
 |           Distro            |          Kernel         |    Arch    |
 |-----------------------------|-------------------------|------------|
+| Kali Linux (Rolling)        |  4.17.9                 |   x86_64   |
 | Kali Linux (Rolling)        |  4.16.18                |   x86_64   |
 | Kali Linux (Rolling)        |  4.14.0-kali3-amd64     |   x86_64   |
 | Ubuntu 16.04.4 LTS          |  4.13.0-36-generic      |   x86_64   |
