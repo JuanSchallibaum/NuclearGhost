@@ -44,6 +44,8 @@
 #include <net/udp.h>
 #include <linux/init.h>
 
+#define TMPSZ 150
+
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(3, 10, 0) && \
     LINUX_VERSION_CODE < KERNEL_VERSION(4, 4, 0)
 
