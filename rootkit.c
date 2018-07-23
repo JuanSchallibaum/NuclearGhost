@@ -42,7 +42,6 @@
 #include <linux/in.h>
 #include <net/tcp.h>
 #include <net/udp.h>
-#include <linux/init.h>
 
 #define TMPSZ 150
 
