@@ -1,3 +1,5 @@
+![alt text](https://github.com/JuanSchallibaum/Nuk3Gh0st/blob/master/logo.jpg)
+
 # Nuk3 Gh0st
 
 Universal LKM Linux kernel rootkit, designed to work in any kernel version and both architectures (x86 and x64).
