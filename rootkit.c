@@ -1028,7 +1028,12 @@ int setup_proc_comm_channel(void)
     //static const struct file_operations proc_file_fops = {0};
     static const struct file_operations proc_file_fops;
     struct proc_dir_entry *proc_entry = proc_create("temporary", 0444, NULL, &proc_file_fops);
+	
+    pr_info("Proc name: %s\n",proc_entry->name);
+	
     proc_entry = proc_entry->parent;
+	
+    pr_info("Parent name: %s\n",proc_entry->name);
 
     if (strcmp(proc_entry->name, "/proc") != 0) {
         pr_info("Couldn't find \"/proc\" entry\n");
