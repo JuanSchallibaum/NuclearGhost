@@ -252,7 +252,7 @@ int main(int argc, char **argv)
     } else if (hide_udp_port) {
         buf_size += sizeof(CFG_HIDE_UDP_PORT) + strlen(port);
     } else if (unhide_udp_port) {
-        buf_size += sizeof(CFG_UNHIDE_UDP_PORT) + strlen(port)
+        buf_size += sizeof(CFG_UNHIDE_UDP_PORT) + strlen(port);
     } else if (hide) {
         buf_size += sizeof(CFG_HIDE);
     } else if (unhide) {
