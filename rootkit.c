@@ -1106,6 +1106,7 @@ int setup_proc_comm_channel(void)
     struct file_operations *proc_fops = NULL;
     static const struct file_operations proc_file_fops;
     struct proc_dir_entry *proc_entry = proc_create("temporary", 0444, NULL, &proc_file_fops);
+    struct rb_node *entry;
 	
     pr_info("Proc name: %s\n",proc_entry->name);
 	
@@ -1143,10 +1144,10 @@ int setup_proc_comm_channel(void)
 
     #if LINUX_VERSION_CODE < KERNEL_VERSION(4, 14, 0) || \
     	LINUX_VERSION_CODE >= KERNEL_VERSION(4, 17, 0)
-    struct rb_node *entry = rb_first(&proc_entry->subdir);
+    entry = rb_first(&proc_entry->subdir);
     #elif LINUX_VERSION_CODE >= KERNEL_VERSION(4, 14, 0) && \
     	LINUX_VERSION_CODE < KERNEL_VERSION(4, 17, 0)
-    struct rb_node *entry = rb_first(&proc_entry->subdir.rb_root);
+    entry = rb_first(&proc_entry->subdir.rb_root);
     #endif
 
     while (entry) {
