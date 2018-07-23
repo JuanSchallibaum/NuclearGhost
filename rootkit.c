@@ -152,7 +152,7 @@ struct proc_dir_entry {
     spinlock_t pde_unload_lock; /* proc_fops checks and pde_users bumps */
     u8 namelen;
     char name[];
-} /*__randomize_layout;*/
+}; /*__randomize_layout;*/
 
 #elif LINUX_VERSION_CODE >= KERNEL_VERSION(4, 14, 0)
 
@@ -177,7 +177,7 @@ struct proc_dir_entry {
     spinlock_t pde_unload_lock; /* proc_fops checks and pde_users bumps */
     u8 namelen;
     char name[];
-} /* __randomize_layout; */
+}; /* __randomize_layout; */
 
 #endif
 
