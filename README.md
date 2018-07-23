@@ -12,9 +12,9 @@ The rootkit can do the following:
 - Hide files or directories by their name
 - Unhide previously hidden files or directories
 - Hide TCP ports (for IPv4 and IPv6)
-- Unhide TCP ports
+- Unhide previously hidden TCP ports
 - Hide UDP ports (for IPv4 and IPv6)
-- Unhide UDP ports
+- Unhide previously hidden UDP ports
 - Hide itself
 - Unhide itself
 - Protect against being unloaded by the user
