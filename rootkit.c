@@ -332,7 +332,7 @@ void asm_hook_remove_all(void)
 
 // ========== END ASM HOOK LIST ==========
 
-
+/*
 unsigned long asm_rmdir_count = 0;
 
 asmlinkage long asm_rmdir(const char __user *pathname)
@@ -348,6 +348,7 @@ asmlinkage long asm_rmdir(const char __user *pathname)
 
     return ret;
 }
+*/
 
 
 // ========== PID LIST ==========
