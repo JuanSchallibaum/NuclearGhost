@@ -61,16 +61,17 @@ struct proc_dir_entry {
 	loff_t size;
 	const struct inode_operations *proc_iops;
 	const struct file_operations *proc_fops;
-	#if LINUX_VERSION_CODE >= KERNEL_VERSION(3, 10, 0)
+	#if LINUX_VERSION_CODE >= KERNEL_VERSION(3, 10, 0) && \
+    	LINUX_VERSION_CODE < KERNEL_VERSION(3, 19, 0)
 	struct proc_dir_entry *next, *parent, *subdir;
-	#elif LINUX_VERSION_CODE >= KERNEL_VERSION(4, 4, 0) && \
+	#elif LINUX_VERSION_CODE >= KERNEL_VERSION(3, 19, 0) && \
     	LINUX_VERSION_CODE < KERNEL_VERSION(4, 13, 0)
-	struct rb_root subdir;
 	struct proc_dir_entry *parent;
+	struct rb_root subdir;
     	struct rb_node subdir_node;
 	#elif LINUX_VERSION_CODE >= KERNEL_VERSION(4, 14, 0)
-	struct rb_root_cached subdir;
 	struct proc_dir_entry *parent;
+	struct rb_root_cached subdir;
     	struct rb_node subdir_node;
 	#endif
 	void *data;
