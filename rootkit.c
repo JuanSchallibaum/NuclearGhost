@@ -168,7 +168,7 @@ struct proc_dir_entry {
 #define SIZEOF_PDE_INLINE_NAME	(128-87)
 #endif
 	char inline_name[SIZEOF_PDE_INLINE_NAME];
-}
+};
 
 #endif
 
