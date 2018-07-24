@@ -67,50 +67,47 @@ Use rootkit:
 
 ```sh
    $ ./client --help
-   
-   888b      88               88         ad888888b,                 
-   8888b     88               88        d8#     #88                 
-   88 `8b    88               88                a8P                 
-   88  `8b   88  88       88  88   ,d8       aad8#                  
-   88   `8b  88  88       88  88 ,a8#        ##Y8,                  
-   88    `8b 88  88       88  8888[             #8b                 
-   88     `8888  #8a,   ,a88  88`#Yba,  Y8,     a88                 
-   88      `888   ##YbbdP'Y8  88   `Y8a  #Y888888P'                 
-                                                                    
-     ,ad8888ba,   88              ,a8888a,                          
-    d8#'    `#8b  88            ,8P#'  `#Y8,                ,d      
-   d8'            88           ,8P        Y8,               88      
-   88             88,dPPYba,   88          88  ,adPPYba,  MM88MMM   
-   88      88888  88P'    #8a  88          88  I8[    ##    88      
-   Y8,        88  88       88  `8b        d8'   `#Y8ba,     88      
-    Y8a.    .a88  88       88   `8ba,  ,ad8'   aa    ]8I    88,     
-     `#Y88888P#   88       88      Y8888P      `#YbbdP#'    #Y888   
-                                                                    
-                                                                    
-                                By Juan Schällibaum                 
-                                                                    
-Usage: ./client [OPTION]...
 
-Options:
-  --root-shell                 Grants you root shell access.
-  --hide-pid=PID               Hides the specified PID.
-  --unhide-pid=PID             Unhides the specified PID.
-  --hide-file=FILENAME         Hides the specified FILENAME globally.
-                               Must be a filename without any path.
-  --unhide-file=FILENAME       Unhides the specified FILENAME.
-  --hide-tcp-port=PORT         Hides the specified tcp PORT.
-  --unhide-tcp-port=PORT       Unhides the specified tcp PORT.
-  --hide-tcp6-port=PORT        Hides the specified tcp6 PORT.
-  --unhide-tcp6-port=PORT      Unhides the specified tcp6 PORT.
-  --hide-udp-port=PORT         Hides the specified udp PORT.
-  --unhide-udp-port=PORT       Unhides the specified udp PORT.
-  --hide-udp6-port=PORT        Hides the specified udp6 PORT.
-  --unhide-udp6-port=PORT      Unhides the specified udp6 PORT.
-  --hide                       Hides the rootkit LKM.
-  --unhide                     Unhides the rootkit LKM.
-  --help                       Print this help message.
-  --protect                    Protects the rootkit from rmmod.
-  --unprotect                  Disables the rmmod protection.
+   $$    $$            $$         $$$$$$        
+   $$$   $$            $$     $$ $$    $$       
+   $$$$  $$  $$    $$  $$    $$        $$       
+   $$ $$ $$  $$    $$  $$   $$     $$$$$        
+   $$  $$$$  $$    $$  $$$$$$         $$        
+   $$   $$$  $$    $$  $$   $$   $$    $$       
+   $$    $$   $$$$$$   $$    $$   $$$$$$        
+
+    $$$$$$  $$        $$$$$$             $$     
+   $$    $$ $$       $$$   $$            $$     
+   $$       $$$$$$$  $$$$  $$  $$$$$$$ $$$$$$   
+   $$  $$$$ $$    $$ $$ $$ $$ $$         $$     
+   $$    $$ $$    $$ $$  $$$$  $$$$$$    $$     
+   $$    $$ $$    $$ $$   $$$       $$   $$ $$  
+    $$$$$$  $$    $$  $$$$$$  $$$$$$$    $$$$   
+
+                   By Juan Schällibaum          
+
+   Usage: ./client [OPTION]...
+
+   Options:
+     --root-shell                 Grants you root shell access.
+     --hide-pid=PID               Hides the specified PID.
+     --unhide-pid=PID             Unhides the specified PID.
+     --hide-file=FILENAME         Hides the specified FILENAME globally.
+                                  Must be a filename without any path.
+     --unhide-file=FILENAME       Unhides the specified FILENAME.
+     --hide-tcp-port=PORT         Hides the specified tcp PORT.
+     --unhide-tcp-port=PORT       Unhides the specified tcp PORT.
+     --hide-tcp6-port=PORT        Hides the specified tcp6 PORT.
+     --unhide-tcp6-port=PORT      Unhides the specified tcp6 PORT.
+     --hide-udp-port=PORT         Hides the specified udp PORT.
+     --unhide-udp-port=PORT       Unhides the specified udp PORT.
+     --hide-udp6-port=PORT        Hides the specified udp6 PORT.
+     --unhide-udp6-port=PORT      Unhides the specified udp6 PORT.
+     --hide                       Hides the rootkit LKM.
+     --unhide                     Unhides the rootkit LKM.
+     --help                       Print this help message.
+     --protect                    Protects the rootkit from rmmod.
+     --unprotect                  Disables the rmmod protection.
 ```
 
 Unload rootkit:
