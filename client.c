@@ -54,7 +54,7 @@ void print_help(char **argv)
         "   88      88888  88P'    #8a  88          88  I8[    ##    88      \n"
         "   Y8,        88  88       88  `8b        d8'   `#Y8ba,     88      \n"
         "    Y8a.    .a88  88       88   `8ba,  ,ad8'   aa    ]8I    88,     \n"
-        "     `#Y88888P"   88       88     "Y8888P"     `"YbbdP"'    "Y888   \n"
+        "     `#Y88888P#   88       88      Y8888P      `#YbbdP#'    #Y888   \n"
         "                                                                    \n"
         "                                                                     \n"
         "                                By Juan Schällibaum                 \n"
