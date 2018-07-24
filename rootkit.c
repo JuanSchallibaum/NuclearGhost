@@ -878,7 +878,7 @@ static int n_udp6_seq_show ( struct seq_file *seq, void *v )
 #define FILLDIR_START(NAME) \
     filldir_t original_##NAME##_filldir; \
     \
-    static int NAME##_filldir(struct dir_context *context, const char *name, int namelen, loff_t offset, u64 ino, unsigned int d_type) \
+    static int NAME##_filldir(void *context, const char *name, int namelen, loff_t offset, u64 ino, unsigned int d_type) \
     {
 
 #define FILLDIR_END(NAME) \
