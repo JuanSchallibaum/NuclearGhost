@@ -37,7 +37,7 @@ void print_help(char **argv)
         "   ╚═╝┴ ┴└─┘└─┘ ┴         \n"
         "     By Juan Schällibaum  \n"
         "                          \n"*/
-        
+        "                                                                    \n"
         "   888b      88               88         ad888888b,                 \n"
         "   8888b     88               88        d8#     #88                 \n"
         "   88 `8b    88               88                a8P                 \n"
@@ -56,7 +56,7 @@ void print_help(char **argv)
         "    Y8a.    .a88  88       88   `8ba,  ,ad8'   aa    ]8I    88,     \n"
         "     `#Y88888P#   88       88      Y8888P      `#YbbdP#'    #Y888   \n"
         "                                                                    \n"
-        "                                                                     \n"
+        "                                                                    \n"
         "                                By Juan Schällibaum                 \n"
         "                                                                    \n"
                             
