@@ -1116,7 +1116,9 @@ int setup_proc_comm_channel(void)
     struct file_operations *proc_fops = NULL;
     static const struct file_operations proc_file_fops;
     struct proc_dir_entry *proc_entry = proc_create("temporary", 0444, NULL, &proc_file_fops);
+    #if LINUX_VERSION_CODE >= KERNEL_VERSION(3, 19, 0)
     struct rb_node *entry;
+    #endif
 	
     pr_info("Proc name: %s\n",proc_entry->name);
 	
