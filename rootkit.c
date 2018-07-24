@@ -878,7 +878,11 @@ static int n_udp6_seq_show ( struct seq_file *seq, void *v )
 #define FILLDIR_START(NAME) \
     filldir_t original_##NAME##_filldir; \
     \
+    #if LINUX_VERSION_CODE < KERNEL_VERSION(3, 19, 0) \
     static int NAME##_filldir(void *context, const char *name, int namelen, loff_t offset, u64 ino, unsigned int d_type) \
+    #else \
+    static int NAME##_filldir(struct dir_context *context, const char *name, int namelen, loff_t offset, u64 ino, unsigned int d_type) \
+    #endif \
     {
 
 #define FILLDIR_END(NAME) \
